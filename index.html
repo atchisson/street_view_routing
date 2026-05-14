@@ -10,6 +10,23 @@
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.css' />
 
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Matomo – cookieless, no consent banner needed (CNIL exemption) -->
+  <script>
+    var _paq = window._paq = window._paq || [];
+    _paq.push(['disableCookies']);
+    _paq.push(['setDoNotTrack', true]);
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//matomo.atchisson.fr/";
+      _paq.push(['setTrackerUrl', u+'matomo.php']);
+      _paq.push(['setSiteId', '5']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Matomo -->
 </head>
 
 <body>
@@ -289,7 +306,7 @@
         <div class="heightgraph-header">
           <span data-i18n="heightgraph.title">Elevation Profile</span>
           <select id="heightgraph-encoded-select" class="heightgraph-select">
-            <option value="none" data-i18n="heightgraph.none">None</option>
+            <option value="none" data-i18n="heightgraph.none" selected>None</option>
             <option value="road_class" data-i18n="heightgraph.roadClass">Road Class</option>
           </select>
         </div>
@@ -301,7 +318,6 @@
       </div>
       
       <div class="github-links">
-        <img src="https://img.shields.io/badge/Status-Experimental-red" alt="Status: Experimental" class="status-badge">
         <div style="flex: 1;"></div>
         <a href="https://github.com/atchisson/missing_mapillary_gh-routing" target="_blank" rel="noopener noreferrer" 
            title="GitHub Repository" 

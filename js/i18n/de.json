@@ -189,7 +189,8 @@
     "photos360": "Nur 360°",
     "photos360Sub": "Sphärische Fotos",
     "period": "Zeitraum",
-    "strength": "Stärke"
+    "strength": "Stärke",
+    "dateCeiling": "Panoramax-Daten sind nur bis {date} verfügbar. Das maximale Datum wurde angepasst."
   },
   "github": {
     "reportIssue": "Fehler melden oder Feedback geben"

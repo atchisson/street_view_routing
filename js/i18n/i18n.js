@@ -60,6 +60,8 @@ export async function setLang(lang) {
     return;
   }
   console.debug('[i18n] setLang:', lang);
+  const _paq = window._paq;
+  if (Array.isArray(_paq)) _paq.push(['trackEvent', 'UI', 'Language', lang]);
   localStorage.setItem('lang', lang);
   currentLang = lang;
   await loadTranslations(lang);

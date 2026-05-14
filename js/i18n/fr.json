@@ -189,7 +189,8 @@
     "photos360": "360° uniquement",
     "photos360Sub": "Photos sphériques",
     "period": "Période",
-    "strength": "Pondération"
+    "strength": "Pondération",
+    "dateCeiling": "Les données Panoramax sont disponibles uniquement jusqu'au {date}. La date maximum a été ajustée."
   },
   "github": {
     "reportIssue": "Signaler un problème ou donner un retour"

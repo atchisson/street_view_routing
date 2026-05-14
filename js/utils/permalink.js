@@ -12,7 +12,7 @@ import { updateWaypointsList } from '../routing/waypoints/waypointList.js';
 import { updateCoordinateTooltips } from '../routing/coordinates/coordinateTooltips.js';
 import { ensureCustomModel } from '../routing/customModel.js';
 import { GRAPHHOPPER_URL, PERMALINK as PERMALINK_CONFIG } from './constants.js';
-import { t } from '../i18n/i18n.js';
+import { t, getLang } from '../i18n/i18n.js';
 
 export class Permalink {
   constructor(map) {
@@ -34,8 +34,18 @@ export class Permalink {
     
     // Wait for map to load before calculating route from URL and setting default view
     this.map.once('load', async () => {
-      if (!this.hasMapParam) {
-        await this.fitMapToRouterBBox();
+      // Always fetch /info to get data freshness date and set input max
+      const bbox = await this.getRouterBBox();
+      if (!this.hasMapParam && bbox) {
+        try {
+          this.map.fitBounds(bbox, {
+            padding: { top: 70, bottom: 70, left: 70, right: 70 },
+            duration: 800
+          });
+        } catch (err) {
+          console.warn('[Permalink] fitBounds failed:', err);
+        }
+        this.drawRouterBBoxLayer(bbox);
       }
       // Sync panoramax layers after map is ready (needed when restored from URL)
       syncPanoramaxLayers();
@@ -106,8 +116,41 @@ export class Permalink {
         return null;
       }
       const data = await response.json();
+      console.debug('[Permalink] /info response:', data);
 
-      // Common keys: bbox or boundingBox, plus min/max lat/lon
+      // ── Coverage date ceiling ──────────────────────────────────────────────
+      // Done before bbox check so it always runs even if bbox is missing.
+      if (data.data_date) {
+        const dataDateStr = data.data_date.substring(0, 10);
+        routeState.panoramaxDataDate = dataDateStr;
+
+        const el = document.getElementById('coverage-date-info');
+        if (el) {
+          const formattedDate = new Intl.DateTimeFormat(getLang(), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(dataDateStr + 'T12:00:00'));
+          el.textContent = t('photoCoverage.coverageDate').replace('{date}', formattedDate);
+          el.style.display = 'block';
+        }
+
+        const maxInput = document.getElementById('photo-date-max');
+        if (maxInput) {
+          maxInput.setAttribute('max', dataDateStr);
+          // Set or clamp: use data date if input is empty or exceeds the ceiling
+          if (!maxInput.value || maxInput.value > dataDateStr) {
+            maxInput.value = dataDateStr;
+            routeState.photoDateMax = dataDateStr;
+          }
+        }
+      }
+
+      if (data.coverage_date_min) {
+        const minInput = document.getElementById('photo-date-min');
+        if (minInput && !minInput.value) {
+          minInput.value = data.coverage_date_min.substring(0, 10);
+          routeState.photoDateMin = minInput.value;
+        }
+      }
+
+      // ── Bounding box ──────────────────────────────────────────────────────
       let bbox = null;
       if (Array.isArray(data.bbox) && data.bbox.length === 4) {
         bbox = data.bbox;
@@ -120,31 +163,7 @@ export class Permalink {
       }
 
       if (!bbox) {
-        console.warn('[Permalink] Router info does not include bboxes');
-        return null;
-      }
-
-      if (data.coverage_date) {
-        const el = document.getElementById('coverage-date-info');
-        if (el) {
-          const dateStr = data.coverage_date.substring(0, 10);
-          el.textContent = t('photoCoverage.coverageDate').replace('{date}', dateStr);
-          el.style.display = 'block';
-        }
-
-        const maxInput = document.getElementById('photo-date-max');
-        if (maxInput && !maxInput.value) {
-          maxInput.value = data.coverage_date.substring(0, 10);
-          routeState.photoDateMax = maxInput.value;
-        }
-      }
-
-      if (data.coverage_date_min) {
-        const minInput = document.getElementById('photo-date-min');
-        if (minInput && !minInput.value) {
-          minInput.value = data.coverage_date_min.substring(0, 10);
-          routeState.photoDateMin = minInput.value;
-        }
+        console.warn('[Permalink] Router info does not include a recognized bbox format');
       }
 
       return this.normalizeBbox(bbox);
@@ -185,29 +204,6 @@ export class Permalink {
     }
 
     return null;
-  }
-
-  async fitMapToRouterBBox() {
-    if (!this.map) return;
-
-    const bbox = await this.getRouterBBox();
-    if (!bbox) {
-      console.warn('[Permalink] No router bbox available to fit map');
-      return;
-    }
-
-    try {
-      this.map.fitBounds(bbox, {
-        padding: { top: 70, bottom: 70, left: 70, right: 70 },
-        duration: 800
-      });
-      console.debug('[Permalink] Map fit to router bbox', bbox);
-    } catch (err) {
-      console.warn('[Permalink] fitBounds failed:', err);
-    }
-
-    // Draw a subtle rectangle showing the GraphHopper coverage area
-    this.drawRouterBBoxLayer(bbox);
   }
 
   /**

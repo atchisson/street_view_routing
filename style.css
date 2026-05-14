@@ -1084,7 +1084,7 @@ code {
   right: 5px;
   width: 320px;
   max-width: calc(100% - 10px);
-  /* max-height is set dynamically in main.js */
+  max-height: calc(100vh - 10px);
   background: var(--bg-primary);
   border-radius: 8px;
   box-shadow: 0 2px 8px var(--shadow-md);
@@ -2424,6 +2424,25 @@ html[data-theme="dark"] .ppill.active .ppill-name {
   border-top: 1px solid var(--border-primary);
   font-size: 13px;
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  max-height: max(250px, calc(100vh - 520px));
+  overflow-y: auto;
+}
+
+.heightgraph-stats::-webkit-scrollbar {
+  width: 6px;
+}
+
+.heightgraph-stats::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.heightgraph-stats::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 3px;
+}
+
+.heightgraph-stats::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }
 
 .heightgraph-stat-item {
@@ -2979,4 +2998,44 @@ html[data-theme="dark"] .ppill.active .ppill-name {
 
 .waypoint-context-menu-item span {
   flex: 1;
+}
+
+/* ───── Data date ceiling toast ───── */
+.pano-date-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  max-width: 340px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.pano-date-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+html[data-theme="dark"] .pano-date-toast {
+  background: #334155;
+  color: #f8fafc;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pano-date-toast {
+    background: #334155;
+    color: #f8fafc;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
 }

@@ -28,6 +28,7 @@ import {
 } from '../utils/constants.js';
 import { setCalculateRouteFunction } from './routeRecalculator.js';
 import { t } from '../i18n/i18n.js';
+import { trackEvent } from '../analytics.js';
 
 // Flag to prevent parallel route calculations
 let routeCalculationInProgress = false;
@@ -925,6 +926,8 @@ export async function calculateRoute(map, start, end, waypoints = []) {
           : computeUncoveredDistance(coordinates, path.details?.photo_coverage);
         routeInfo.innerHTML = generateRouteInfoHTML(path, uncoveredDistance);
 
+        trackEvent('Route', 'Calculate', routeState.selectedProfile, Math.round((path.distance || 0) / 1000));
+
         // Store route data for redrawing heightgraph and route visualization
         routeState.currentRouteData = {
           elevations: hasElevation ? elevations : [],
@@ -1047,6 +1050,7 @@ export async function calculateRoute(map, start, end, waypoints = []) {
     console.error('Routing error:', error);
     
     const userFriendlyMessage = getUserFriendlyErrorMessage(error);
+    trackEvent('Route', 'Error', error.message === 'OUT_OF_BOUNDS' ? 'out_of_bounds' : 'other');
     displayRouteError(userFriendlyMessage, routeInfo);
     
     // Show alert with user-friendly message

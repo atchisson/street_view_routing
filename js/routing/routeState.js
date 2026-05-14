@@ -52,6 +52,10 @@ export const routeState = {
   // Date range filter for Panoramax coverage (YYYY-MM-DD strings or null = no filter)
   photoDateMin: null,
   photoDateMax: null,
+
+  // Data freshness ceiling from /info endpoint (YYYY-MM-DD string or null)
+  // The Panoramax parquet used for routing is updated weekly; this is the latest available date.
+  panoramaxDataDate: null,
   
   // Default custom model (imported from customModel.js)
   // Returns the appropriate default model based on selected profile

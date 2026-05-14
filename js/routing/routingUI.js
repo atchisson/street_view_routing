@@ -12,6 +12,7 @@ import { ERROR_MESSAGES } from '../utils/constants.js';
 import { t } from '../i18n/i18n.js';
 import { recalculateRouteIfReady } from './routeRecalculator.js';
 import { isRouteCalculationInProgress } from './routing.js';
+import { trackEvent } from '../analytics.js';
 import { createStartMarker, createEndMarker, createWaypointMarker } from './markers/markerFactory.js';
 import { updateWaypointsList } from './waypoints/waypointList.js';
 import { updateCoordinateTooltips } from './coordinates/coordinateTooltips.js';
@@ -100,7 +101,11 @@ function applyPanoramaxDateFilter() {
   const map = window.map;
   if (!map) return;
   const minDate = routeState.photoDateMin;
-  const maxDate = routeState.photoDateMax;
+  // Always cap to data freshness ceiling so the layer never shows photos beyond what the router knows
+  let maxDate = routeState.photoDateMax;
+  if (routeState.panoramaxDataDate) {
+    maxDate = (maxDate && maxDate < routeState.panoramaxDataDate) ? maxDate : routeState.panoramaxDataDate;
+  }
 
   const baseFilters = {
     'panoramax-sequences-flat': ['==', ['get', 'type'], 'flat'],
@@ -118,6 +123,21 @@ function applyPanoramaxDateFilter() {
       ]);
     }
   });
+}
+
+function showDataDateToast(dataDate) {
+  if (sessionStorage.getItem('panoramaxDateCeilingWarned')) return;
+  sessionStorage.setItem('panoramaxDateCeilingWarned', '1');
+  const msg = t('photoCoverage.dateCeiling').replace('{date}', dataDate);
+  const toast = document.createElement('div');
+  toast.className = 'pano-date-toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 6000);
 }
 
 export function updateStrengthRowVisibility() {
@@ -310,6 +330,7 @@ export function setupUIHandlers(map) {
   const exportGpxBtn = document.getElementById('export-gpx');
   if (exportGpxBtn) {
     exportGpxBtn.addEventListener('click', () => {
+      trackEvent('Route', 'ExportGPX');
       exportRouteToGPX();
     });
   }
@@ -372,6 +393,7 @@ export function setupUIHandlers(map) {
       const wasActive = routeState.avoidPhotoCoverage;
       routeState.avoidPhotoCoverage = !wasActive;
       routeState.avoidPhotoCoverageOnly360 = false;
+      trackEvent('Panoramax', wasActive ? 'Disable' : 'Enable', 'all');
       document.getElementById('avoid-photo-coverage').checked = routeState.avoidPhotoCoverage;
       document.getElementById('avoid-photo-coverage-360').checked = false;
       if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
@@ -388,6 +410,7 @@ export function setupUIHandlers(map) {
       const wasActive = routeState.avoidPhotoCoverageOnly360;
       routeState.avoidPhotoCoverageOnly360 = !wasActive;
       routeState.avoidPhotoCoverage = false;
+      trackEvent('Panoramax', wasActive ? 'Disable' : 'Enable', '360');
       document.getElementById('avoid-photo-coverage-360').checked = routeState.avoidPhotoCoverageOnly360;
       document.getElementById('avoid-photo-coverage').checked = false;
       if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
@@ -414,7 +437,14 @@ export function setupUIHandlers(map) {
 
   if (photoDateMaxInput) {
     photoDateMaxInput.addEventListener('change', (e) => {
-      routeState.photoDateMax = e.target.value || null;
+      const value = e.target.value || null;
+      if (value && routeState.panoramaxDataDate && value > routeState.panoramaxDataDate) {
+        showDataDateToast(routeState.panoramaxDataDate);
+        e.target.value = routeState.panoramaxDataDate;
+        routeState.photoDateMax = routeState.panoramaxDataDate;
+      } else {
+        routeState.photoDateMax = value;
+      }
       applyPanoramaxDateFilter();
       if (routeState.customModel && (routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360)) {
         applyPhotoCoverageSettings();
@@ -429,6 +459,7 @@ export function setupUIHandlers(map) {
       const profile = btn.dataset.profile;
       if (profile === routeState.selectedProfile) return;
 
+      trackEvent('Route', 'Profile', profile);
       routeState.selectedProfile = profile;
       routeState.customModel = ensureCustomModel(null, profile);
 

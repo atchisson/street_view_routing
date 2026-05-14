@@ -56,9 +56,10 @@ export function addBasicLayers(map) {
       map.addLayer({
         ...lineBase,
         id: "panoramax-sequences-flat",
+        minzoom: 6,
         filter: ["==", ["get", "type"], "flat"],
         paint: {
-          "line-color": "#f97316",   // orange for regular photos
+          "line-color": "#f97316",
           "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.5, 14, 3],
           "line-opacity": 0.85
         }
@@ -73,9 +74,10 @@ export function addBasicLayers(map) {
       map.addLayer({
         ...lineBase,
         id: "panoramax-sequences-360",
+        minzoom: 6,
         filter: ["==", ["get", "type"], "equirectangular"],
         paint: {
-          "line-color": "#c2410c",   // dark orange for 360° photos
+          "line-color": "#c2410c",
           "line-width": ["interpolate", ["linear"], ["zoom"], 7, 1.5, 14, 3],
           "line-opacity": 0.85
         }
