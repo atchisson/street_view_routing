@@ -1920,6 +1920,46 @@ input[type="range"].slider::-moz-range-thumb,
   margin-top: 10px;
 }
 
+.coverage-date-info {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-secondary, #6b7280);
+  font-style: italic;
+}
+
+.coverage-date-range {
+  margin-top: 8px;
+}
+
+.date-range-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.date-range-label {
+  font-size: 11px;
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+}
+
+.date-range-row input[type="date"] {
+  font-size: 11px;
+  padding: 2px 4px;
+  border: 1px solid var(--border-primary, #e5e7eb);
+  border-radius: 4px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #111827);
+  flex: 1;
+  min-width: 0;
+}
+
+.date-range-row input[type="date"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .mapillary-weight-comparison {
   margin-top: 10px;
   padding-top: 10px;

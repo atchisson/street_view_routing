@@ -264,23 +264,47 @@ export function getMapillaryPriority(customModel) {
 // ============================================================================
 
 /**
- * Set or remove photo_coverage avoidance rule
+ * Convert a YYYY-MM-DD date string to integer days since 1970-01-01.
+ * Used to build date-aware custom model conditions for photo_date_min/max EVs.
+ */
+export function dateToDaysEpoch(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1970, 0, 1)) / 86400000);
+}
+
+/**
+ * Build a photo_coverage condition string, optionally restricted to a date range.
+ * minDate/maxDate are YYYY-MM-DD strings or null.
+ */
+function buildPhotoCoverageCondition(baseCondition, dateMin, dateMax) {
+  let cond = baseCondition;
+  if (dateMin) cond += ` && photo_date_max >= ${dateToDaysEpoch(dateMin)}`;
+  if (dateMax) cond += ` && photo_date_min <= ${dateToDaysEpoch(dateMax)}`;
+  return cond;
+}
+
+/**
+ * Set or remove photo_coverage avoidance rule, with optional date range filter.
  * @param {Object} customModel
  * @param {boolean} enabled
  * @param {number} multiplier
+ * @param {string|null} dateMin  YYYY-MM-DD or null
+ * @param {string|null} dateMax  YYYY-MM-DD or null
  * @returns {Object}
  */
-export function updatePhotoCoverageRule(customModel, enabled, multiplier = 0.1) {
+export function updatePhotoCoverageRule(customModel, enabled, multiplier = 0.1, dateMin = null, dateMax = null) {
   if (!customModel || !customModel.priority) return customModel;
 
-  const ruleIndex = customModel.priority.findIndex(r => r.if && r.if === 'photo_coverage');
+  const ruleIndex = customModel.priority.findIndex(
+    r => r.if && r.if.startsWith('photo_coverage') && !r.if.includes('only360')
+  );
 
   if (enabled) {
-    const newRule = {"if": "photo_coverage", "multiply_by": multiplier};
+    const condition = buildPhotoCoverageCondition('photo_coverage', dateMin, dateMax);
+    const newRule = {"if": condition, "multiply_by": multiplier};
     if (ruleIndex !== -1) {
       customModel.priority[ruleIndex] = newRule;
     } else {
-      // Append rule at end
       customModel.priority.push(newRule);
     }
   } else {
@@ -293,23 +317,28 @@ export function updatePhotoCoverageRule(customModel, enabled, multiplier = 0.1) 
 }
 
 /**
- * Set or remove photo_coverage_only360 avoidance rule
+ * Set or remove photo_coverage_only360 avoidance rule, with optional date range filter.
  * @param {Object} customModel
  * @param {boolean} enabled
  * @param {number} multiplier
+ * @param {string|null} dateMin  YYYY-MM-DD or null
+ * @param {string|null} dateMax  YYYY-MM-DD or null
  * @returns {Object}
  */
-export function updatePhotoCoverageOnly360Rule(customModel, enabled, multiplier = 0.05) {
+export function updatePhotoCoverageOnly360Rule(customModel, enabled, multiplier = 0.05, dateMin = null, dateMax = null) {
   if (!customModel || !customModel.priority) return customModel;
 
   const ruleIndex = customModel.priority.findIndex(r => r.if && r.if.includes('photo_coverage_only360'));
 
   if (enabled) {
-    const newRule = {"if": "photo_coverage_only360", "multiply_by": multiplier};
+    const condition = buildPhotoCoverageCondition('photo_coverage_only360', dateMin, dateMax);
+    const newRule = {"if": condition, "multiply_by": multiplier};
     if (ruleIndex !== -1) {
       customModel.priority[ruleIndex] = newRule;
     } else {
-      const photoRuleIndex = customModel.priority.findIndex(r => r.if && r.if.includes('photo_coverage'));
+      const photoRuleIndex = customModel.priority.findIndex(
+        r => r.if && r.if.startsWith('photo_coverage') && !r.if.includes('only360')
+      );
       if (photoRuleIndex !== -1) {
         customModel.priority.splice(photoRuleIndex + 1, 0, newRule);
       } else {

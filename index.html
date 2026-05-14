@@ -220,6 +220,15 @@
             </label>
             <span class="photo-coverage-text" data-i18n="photoCoverage.avoid360Coverage">Avoid 360° photo coverage</span>
           </div>
+          <div id="coverage-date-info" class="coverage-date-info" style="display: none;"></div>
+          <div id="coverage-date-range" class="coverage-date-range" style="display: none;">
+            <div class="date-range-row">
+              <span class="date-range-label" data-i18n="photoCoverage.from">From</span>
+              <input type="date" id="photo-date-min" disabled>
+              <span class="date-range-label" data-i18n="photoCoverage.to">to</span>
+              <input type="date" id="photo-date-max" disabled>
+            </div>
+          </div>
           <div class="photo-coverage-strength-row" id="photo-coverage-strength-row" style="display: none;">
             <span class="strength-label" data-i18n="photoCoverage.weak">Weak</span>
             <input type="range" id="photo-coverage-strength" min="0" max="100" value="50" class="photo-coverage-slider" />

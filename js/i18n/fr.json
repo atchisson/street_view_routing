@@ -161,8 +161,11 @@
   "photoCoverage": {
     "avoidCoverage": "Éviter les zones couvertes (Panoramax)",
     "avoid360Coverage": "Éviter les zones couvertes en 360° (Panoramax)",
+    "coverageDate": "Données Panoramax du {date}",
     "weak": "Faible",
-    "strong": "Fort"
+    "strong": "Fort",
+    "from": "Du",
+    "to": "au"
   },
   "github": {
     "reportIssue": "Signaler un problème ou donner un retour"

@@ -6,6 +6,7 @@ import { updateWaypointsList } from '../routing/waypoints/waypointList.js';
 import { updateCoordinateTooltips } from '../routing/coordinates/coordinateTooltips.js';
 import { ensureCustomModel } from '../routing/customModel.js';
 import { GRAPHHOPPER_URL, PERMALINK as PERMALINK_CONFIG } from './constants.js';
+import { t } from '../i18n/i18n.js';
 
 export class Permalink {
   constructor(map) {
@@ -108,6 +109,39 @@ export class Permalink {
       if (!bbox) {
         console.warn('[Permalink] Router info does not include bboxes');
         return null;
+      }
+
+      if (data.coverage_date) {
+        const el = document.getElementById('coverage-date-info');
+        if (el) {
+          const dateStr = data.coverage_date.substring(0, 10);
+          el.textContent = t('photoCoverage.coverageDate').replace('{date}', dateStr);
+          el.style.display = 'block';
+        }
+      }
+
+      // Date range picker: show and populate only when date data is available
+      if (data.coverage_date_min || data.coverage_date) {
+        const dateRangeEl = document.getElementById('coverage-date-range');
+        if (dateRangeEl) dateRangeEl.style.display = 'block';
+
+        const minInput = document.getElementById('photo-date-min');
+        const maxInput = document.getElementById('photo-date-max');
+
+        if (minInput) {
+          minInput.disabled = false;
+          if (data.coverage_date_min) {
+            minInput.value = data.coverage_date_min.substring(0, 10);
+            routeState.photoDateMin = minInput.value;
+          }
+        }
+        if (maxInput) {
+          maxInput.disabled = false;
+          if (data.coverage_date) {
+            maxInput.value = data.coverage_date.substring(0, 10);
+            routeState.photoDateMax = maxInput.value;
+          }
+        }
       }
 
       return this.normalizeBbox(bbox);

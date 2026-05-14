@@ -71,18 +71,43 @@ function getPhotoCoverageMultipliers() {
 function applyPhotoCoverageSettings() {
   if (!routeState.customModel) return;
   const { photo, photo360 } = getPhotoCoverageMultipliers();
+  const dateMin = routeState.photoDateMin;
+  const dateMax = routeState.photoDateMax;
 
   routeState.customModel = updatePhotoCoverageRule(
     routeState.customModel,
     routeState.avoidPhotoCoverage,
-    photo
+    photo,
+    dateMin,
+    dateMax
   );
 
   routeState.customModel = updatePhotoCoverageOnly360Rule(
     routeState.customModel,
     routeState.avoidPhotoCoverageOnly360,
-    photo360
+    photo360,
+    dateMin,
+    dateMax
   );
+}
+
+function applyPanoramaxDateFilter() {
+  const map = window.map;
+  if (!map) return;
+  const minDate = routeState.photoDateMin;
+  const maxDate = routeState.photoDateMax;
+
+  ['panoramax-sequences-flat', 'panoramax-sequences-360'].forEach(layerId => {
+    if (!map.getLayer(layerId)) return;
+    if (!minDate && !maxDate) {
+      map.setFilter(layerId, null);
+    } else {
+      const conditions = ['all'];
+      if (minDate) conditions.push(['>=', ['get', 'date'], minDate]);
+      if (maxDate) conditions.push(['<=', ['get', 'date'], maxDate]);
+      map.setFilter(layerId, conditions);
+    }
+  });
 }
 
 function updateStrengthRowVisibility() {
@@ -103,6 +128,7 @@ function syncPanoramaxLayers() {
   };
   setVis('panoramax-sequences-flat', routeState.avoidPhotoCoverage);
   setVis('panoramax-sequences-360', routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360);
+  applyPanoramaxDateFilter();
 }
 export function setupUIHandlers(map) {
   const startBtn = document.getElementById('set-start');
@@ -302,6 +328,31 @@ export function setupUIHandlers(map) {
     strengthSlider.addEventListener('input', (e) => {
       routeState.photoCoverageStrength = parseFloat(e.target.value);
       if (routeState.customModel) {
+        applyPhotoCoverageSettings();
+        recalculateRouteIfReady();
+      }
+    });
+  }
+
+  const photoDateMinInput = document.getElementById('photo-date-min');
+  const photoDateMaxInput = document.getElementById('photo-date-max');
+
+  if (photoDateMinInput) {
+    photoDateMinInput.addEventListener('change', (e) => {
+      routeState.photoDateMin = e.target.value || null;
+      applyPanoramaxDateFilter();
+      if (routeState.customModel && (routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360)) {
+        applyPhotoCoverageSettings();
+        recalculateRouteIfReady();
+      }
+    });
+  }
+
+  if (photoDateMaxInput) {
+    photoDateMaxInput.addEventListener('change', (e) => {
+      routeState.photoDateMax = e.target.value || null;
+      applyPanoramaxDateFilter();
+      if (routeState.customModel && (routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360)) {
         applyPhotoCoverageSettings();
         recalculateRouteIfReady();
       }

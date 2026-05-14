@@ -48,6 +48,10 @@ export const routeState = {
   avoidPhotoCoverage: false,
   avoidPhotoCoverageOnly360: false,
   photoCoverageStrength: 50, // 0 (weak) to 100 (strong), continuous exponential scale
+
+  // Date range filter for Panoramax coverage (YYYY-MM-DD strings or null = no filter)
+  photoDateMin: null,
+  photoDateMax: null,
   
   // Default custom model (imported from customModel.js)
   // Returns the appropriate default model based on selected profile
