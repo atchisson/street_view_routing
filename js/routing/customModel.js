@@ -264,12 +264,12 @@ export function getMapillaryPriority(customModel) {
 // ============================================================================
 
 /**
- * Convert a YYYY-MM-DD date string to integer days since 1970-01-01.
- * Used to build date-aware custom model conditions for photo_date_min/max EVs.
+ * Convert a YYYY-MM-DD date string to integer days since 1000-01-01.
+ * Must match the epoch used by tools/panoramax_preprocess.py and PhotoCoverage.java.
  */
 export function dateToDaysEpoch(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
-  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1970, 0, 1)) / 86400000);
+  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1000, 0, 1)) / 86400000);
 }
 
 /**

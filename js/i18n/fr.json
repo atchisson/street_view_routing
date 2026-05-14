@@ -36,7 +36,26 @@
     "title": "Profil altimétrique",
     "mapillaryCoverage": "Couverture Mapillary",
     "surface": "Revêtement",
+    "none": "Aucun",
     "roadClass": "Type de voie",
+    "roadClasses": {
+      "motorway": "Autoroute",
+      "trunk": "Voie rapide",
+      "primary": "Route principale",
+      "secondary": "Route secondaire",
+      "tertiary": "Route tertiaire",
+      "unclassified": "Route non classifiée",
+      "residential": "Rue résidentielle",
+      "service": "Voie de service",
+      "path": "Chemin",
+      "footway": "Cheminement piéton",
+      "cycleway": "Piste cyclable",
+      "track": "Piste / Chemin de terre",
+      "steps": "Escaliers",
+      "living_street": "Zone de rencontre",
+      "pedestrian": "Zone piétonne",
+      "other": "Autre"
+    },
     "bicycleInfra": "Infrastructure cyclable",
     "elevation": "Altitude (m)",
     "streetName": "Nom de rue",
@@ -95,7 +114,7 @@
     "setEnd": "Définir comme destination",
     "setWaypoint": "Définir comme étape",
     "osmQuery": "Interroger les objets OSM",
-    "mapillary": "Ouvrir dans Mapillary"
+    "panoramax": "Ouvrir dans Panoramax"
   },
   "waypointMenu": {
     "delete": "Supprimer",
@@ -165,7 +184,12 @@
     "weak": "Faible",
     "strong": "Fort",
     "from": "Du",
-    "to": "au"
+    "to": "au",
+    "allPhotos": "Toutes les photos",
+    "photos360": "360° uniquement",
+    "photos360Sub": "Photos sphériques",
+    "period": "Période",
+    "strength": "Pondération"
   },
   "github": {
     "reportIssue": "Signaler un problème ou donner un retour"

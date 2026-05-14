@@ -73,9 +73,7 @@ function clearIndicatorLine(indicatorCanvas, canvasWidth, canvasHeight) {
 export function setupHeightgraphInteractivity(canvas, elevations, totalDistance, coordinates, cumulativeDistances = null, canvasWidth = null, canvasHeight = null) {
   if (!canvas || !routeState.currentRouteData || !routeState.mapInstance || !coordinates || coordinates.length === 0) return;
   
-  const { encodedValues } = routeState.currentRouteData;
   const select = document.getElementById('heightgraph-encoded-select');
-  const selectedType = select ? select.value : 'mapillary_coverage';
   const padding = HEIGHTGRAPH_CONFIG.padding;
   
   // Get indicator canvas and store in closure
@@ -233,20 +231,22 @@ export function setupHeightgraphInteractivity(canvas, elevations, totalDistance,
         tooltipContent += `${t('heightgraph.tooltip.elevation')}: ${Math.round(elevation)} m<br>`;
       }
       
-      // Add encoded value
-      if (selectedType === 'mapillary_coverage' && encodedValues.mapillary_coverage && encodedValues.mapillary_coverage[dataIndex] !== undefined && 
-          encodedValues.mapillary_coverage[dataIndex] !== null) {
-        const customValue = encodedValues.mapillary_coverage[dataIndex];
-        const customPresentText = typeof customValue === 'boolean' 
-          ? (customValue ? t('heightgraph.tooltip.yes') : t('heightgraph.tooltip.no')) 
+      // Read both select value and encodedValues dynamically to avoid stale closures
+      const currentType = select ? select.value : '';
+      const liveEncoded = routeState.currentRouteData?.encodedValues || {};
+      if (currentType === 'mapillary_coverage' && liveEncoded.mapillary_coverage?.[dataIndex] != null) {
+        const customValue = liveEncoded.mapillary_coverage[dataIndex];
+        const customPresentText = typeof customValue === 'boolean'
+          ? (customValue ? t('heightgraph.tooltip.yes') : t('heightgraph.tooltip.no'))
           : String(customValue);
         tooltipContent += `${t('heightgraph.mapillaryCoverage')}: ${customPresentText}`;
-      } else if (selectedType === 'surface' && encodedValues.surface && encodedValues.surface[dataIndex] !== undefined && 
-                 encodedValues.surface[dataIndex] !== null) {
-        tooltipContent += `${t('heightgraph.surface')}: ${String(encodedValues.surface[dataIndex])}`;
-      } else if (selectedType === 'road_class' && encodedValues.road_class && encodedValues.road_class[dataIndex] !== undefined &&
-                 encodedValues.road_class[dataIndex] !== null) {
-        tooltipContent += `${t('heightgraph.roadClass')}: ${String(encodedValues.road_class[dataIndex])}`;
+      } else if (currentType === 'surface' && liveEncoded.surface?.[dataIndex] != null) {
+        tooltipContent += `${t('heightgraph.surface')}: ${String(liveEncoded.surface[dataIndex])}`;
+      } else if (currentType === 'road_class' && liveEncoded.road_class?.[dataIndex] != null) {
+        const rawValue = String(liveEncoded.road_class[dataIndex]);
+        const translatedKey = `heightgraph.roadClasses.${rawValue}`;
+        const label = t(translatedKey) !== translatedKey ? t(translatedKey) : rawValue;
+        tooltipContent += `${t('heightgraph.roadClass')}: ${label}`;
       }
 
       // Show tooltip

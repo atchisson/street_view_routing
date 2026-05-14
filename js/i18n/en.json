@@ -36,7 +36,26 @@
     "title": "Elevation Profile",
     "mapillaryCoverage": "Mapillary Coverage",
     "surface": "Surface",
+    "none": "None",
     "roadClass": "Road Class",
+    "roadClasses": {
+      "motorway": "Motorway",
+      "trunk": "Trunk road",
+      "primary": "Primary road",
+      "secondary": "Secondary road",
+      "tertiary": "Tertiary road",
+      "unclassified": "Unclassified road",
+      "residential": "Residential street",
+      "service": "Service road",
+      "path": "Path",
+      "footway": "Footway",
+      "cycleway": "Cycleway",
+      "track": "Track",
+      "steps": "Steps",
+      "living_street": "Living street",
+      "pedestrian": "Pedestrian zone",
+      "other": "Other"
+    },
     "bicycleInfra": "Bicycle Infrastructure",
     "elevation": "Elevation (m)",
     "streetName": "Street name",
@@ -95,7 +114,7 @@
     "setEnd": "Set as destination",
     "setWaypoint": "Set as waypoint",
     "osmQuery": "OSM object query",
-    "mapillary": "Open in Mapillary"
+    "panoramax": "Open in Panoramax"
   },
   "waypointMenu": {
     "delete": "Delete",
@@ -165,7 +184,12 @@
     "weak": "Weak",
     "strong": "Strong",
     "from": "From",
-    "to": "to"
+    "to": "to",
+    "allPhotos": "All photos",
+    "photos360": "360° only",
+    "photos360Sub": "Spherical photos",
+    "period": "Period",
+    "strength": "Strength"
   },
   "github": {
     "reportIssue": "Report a bug or give feedback"

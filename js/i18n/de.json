@@ -36,7 +36,26 @@
     "title": "Höhenprofil",
     "mapillaryCoverage": "Mapillary Coverage",
     "surface": "Surface",
+    "none": "Keine",
     "roadClass": "Straßenklasse",
+    "roadClasses": {
+      "motorway": "Autobahn",
+      "trunk": "Schnellstraße",
+      "primary": "Hauptstraße",
+      "secondary": "Nebenstraße",
+      "tertiary": "Tertiärstraße",
+      "unclassified": "Nicht klassifiziert",
+      "residential": "Wohnstraße",
+      "service": "Dienststraße",
+      "path": "Pfad",
+      "footway": "Fußweg",
+      "cycleway": "Radweg",
+      "track": "Feldweg",
+      "steps": "Stufen",
+      "living_street": "Spielstraße",
+      "pedestrian": "Fußgängerzone",
+      "other": "Sonstige"
+    },
     "bicycleInfra": "Fahrradinfrastruktur",
     "elevation": "Höhe (m)",
     "streetName": "Straßenname",
@@ -95,7 +114,7 @@
     "setEnd": "Zielpunkt setzen",
     "setWaypoint": "Zwischenpunkt setzen",
     "osmQuery": "OSM Objektabfrage",
-    "mapillary": "zu Mapillary"
+    "panoramax": "In Panoramax öffnen"
   },
   "waypointMenu": {
     "delete": "Löschen",
@@ -165,7 +184,12 @@
     "weak": "Schwach",
     "strong": "Stark",
     "from": "Von",
-    "to": "bis"
+    "to": "bis",
+    "allPhotos": "Alle Fotos",
+    "photos360": "Nur 360°",
+    "photos360Sub": "Sphärische Fotos",
+    "period": "Zeitraum",
+    "strength": "Stärke"
   },
   "github": {
     "reportIssue": "Fehler melden oder Feedback geben"

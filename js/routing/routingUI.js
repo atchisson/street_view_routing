@@ -68,7 +68,12 @@ function getPhotoCoverageMultipliers() {
   };
 }
 
-function applyPhotoCoverageSettings() {
+function updateOptSliderBg(el) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = `linear-gradient(to right, #3b82f6 ${pct}%, var(--border-secondary, #d1d5db) ${pct}%)`;
+}
+
+export function applyPhotoCoverageSettings() {
   if (!routeState.customModel) return;
   const { photo, photo360 } = getPhotoCoverageMultipliers();
   const dateMin = routeState.photoDateMin;
@@ -97,30 +102,46 @@ function applyPanoramaxDateFilter() {
   const minDate = routeState.photoDateMin;
   const maxDate = routeState.photoDateMax;
 
-  ['panoramax-sequences-flat', 'panoramax-sequences-360'].forEach(layerId => {
+  const baseFilters = {
+    'panoramax-sequences-flat': ['==', ['get', 'type'], 'flat'],
+    'panoramax-sequences-360': ['==', ['get', 'type'], 'equirectangular'],
+  };
+
+  Object.entries(baseFilters).forEach(([layerId, baseFilter]) => {
     if (!map.getLayer(layerId)) return;
     if (!minDate && !maxDate) {
-      map.setFilter(layerId, null);
+      map.setFilter(layerId, baseFilter);
     } else {
-      const conditions = ['all'];
-      if (minDate) conditions.push(['>=', ['get', 'date'], minDate]);
-      if (maxDate) conditions.push(['<=', ['get', 'date'], maxDate]);
-      map.setFilter(layerId, conditions);
+      map.setFilter(layerId, ['all', baseFilter,
+        ...( minDate ? [['>=', ['get', 'date'], minDate]] : [] ),
+        ...( maxDate ? [['<=', ['get', 'date'], maxDate]] : [] ),
+      ]);
     }
   });
 }
 
-function updateStrengthRowVisibility() {
-  const row = document.getElementById('photo-coverage-strength-row');
-  if (!row) return;
+export function updateStrengthRowVisibility() {
   const anyChecked = routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360;
-  row.style.display = anyChecked ? 'flex' : 'none';
+
+  const options = document.getElementById('pano-options');
+  if (options) options.classList.toggle('show', anyChecked);
+
+  const accordion = document.getElementById('pano-accordion');
+  if (accordion) {
+    accordion.classList.toggle('active', anyChecked);
+    if (anyChecked) accordion.classList.add('open');
+  }
+
+  const pillAll = document.getElementById('ppill-all');
+  if (pillAll) pillAll.classList.toggle('active', !!routeState.avoidPhotoCoverage);
+  const pill360 = document.getElementById('ppill-360');
+  if (pill360) pill360.classList.toggle('active', !!routeState.avoidPhotoCoverageOnly360);
 }
 
 // Show/hide Panoramax map layers to match checkbox state.
 // avoid-photo-coverage   → flat + 360 sequences (avoids all coverage)
 // avoid-photo-coverage-360 → 360 sequences only
-function syncPanoramaxLayers() {
+export function syncPanoramaxLayers() {
   const map = window.map;
   if (!map) return;
   const setVis = (id, visible) => {
@@ -325,12 +346,55 @@ export function setupUIHandlers(map) {
   const strengthSlider = document.getElementById('photo-coverage-strength');
   if (strengthSlider) {
     strengthSlider.value = routeState.photoCoverageStrength ?? 50;
+    updateOptSliderBg(strengthSlider);
     strengthSlider.addEventListener('input', (e) => {
       routeState.photoCoverageStrength = parseFloat(e.target.value);
+      updateOptSliderBg(e.target);
       if (routeState.customModel) {
         applyPhotoCoverageSettings();
         recalculateRouteIfReady();
       }
+    });
+  }
+
+  // Accordion header toggle
+  const panoHeader = document.getElementById('pano-accordion-header');
+  if (panoHeader) {
+    panoHeader.addEventListener('click', () => {
+      document.getElementById('pano-accordion').classList.toggle('open');
+    });
+  }
+
+  // Pills – radio-like: selecting one deselects the other; clicking active pill deselects it
+  const ppillAll = document.getElementById('ppill-all');
+  if (ppillAll) {
+    ppillAll.addEventListener('click', () => {
+      const wasActive = routeState.avoidPhotoCoverage;
+      routeState.avoidPhotoCoverage = !wasActive;
+      routeState.avoidPhotoCoverageOnly360 = false;
+      document.getElementById('avoid-photo-coverage').checked = routeState.avoidPhotoCoverage;
+      document.getElementById('avoid-photo-coverage-360').checked = false;
+      if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
+      applyPhotoCoverageSettings();
+      updateStrengthRowVisibility();
+      syncPanoramaxLayers();
+      recalculateRouteIfReady();
+    });
+  }
+
+  const ppill360 = document.getElementById('ppill-360');
+  if (ppill360) {
+    ppill360.addEventListener('click', () => {
+      const wasActive = routeState.avoidPhotoCoverageOnly360;
+      routeState.avoidPhotoCoverageOnly360 = !wasActive;
+      routeState.avoidPhotoCoverage = false;
+      document.getElementById('avoid-photo-coverage-360').checked = routeState.avoidPhotoCoverageOnly360;
+      document.getElementById('avoid-photo-coverage').checked = false;
+      if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
+      applyPhotoCoverageSettings();
+      updateStrengthRowVisibility();
+      syncPanoramaxLayers();
+      recalculateRouteIfReady();
     });
   }
 

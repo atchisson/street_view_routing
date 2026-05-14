@@ -72,6 +72,8 @@ export function updateHeightgraphStats(encodedType, encodedValues) {
       backgroundColor = getSurfaceColorForStats(key);
     } else if (encodedType === 'road_class') {
       backgroundColor = getRoadClassColorForStats(key);
+      const translated = t(`heightgraph.roadClasses.${key}`);
+      if (translated !== `heightgraph.roadClasses.${key}`) displayKey = translated;
     }
 
     // Add data attributes for hover functionality

@@ -2,6 +2,7 @@
 
 import { setStartPoint, setEndPoint } from '../routing/routingUI.js';
 import { addWaypoint } from '../routing/waypoints/waypointManager.js';
+import { routeState } from '../routing/routeState.js';
 
 let contextMenu = null;
 let currentLngLat = null;
@@ -147,10 +148,14 @@ function updateExternalLinks(lngLat, zoom) {
     osmLink.href = `https://www.openstreetmap.org/query?lat=${lat}&lon=${lng}`;
   }
 
-  // Update Mapillary link
-  const mapillaryLink = document.getElementById('context-menu-mapillary');
-  if (mapillaryLink) {
-    mapillaryLink.href = `https://www.mapillary.com/app/?focus=map&lat=${lat}&lng=${lng}&z=${zoom}&dateFrom=2023-01-01`;
+  // Update Panoramax link
+  const panoramaxLink = document.getElementById('context-menu-panoramax');
+  if (panoramaxLink) {
+    let panoramaxUrl = `https://explore.panoramax.fr/fr/index?focus=map&map=${Math.round(zoom)}/${lat}/${lng}`;
+    if (routeState.photoDateMin) panoramaxUrl += `&date_from=${routeState.photoDateMin}`;
+    if (routeState.photoDateMax) panoramaxUrl += `&date_to=${routeState.photoDateMax}`;
+    if (routeState.avoidPhotoCoverageOnly360 && !routeState.avoidPhotoCoverage) panoramaxUrl += `&pic_type=equirectangular`;
+    panoramaxLink.href = panoramaxUrl;
   }
 }
 
@@ -222,7 +227,7 @@ function setupMenuHandlers(map) {
     }, true);
   }
 
-  const mapillaryLink = document.getElementById('context-menu-mapillary');
+  const mapillaryLink = document.getElementById('context-menu-panoramax');
   if (mapillaryLink) {
     mapillaryLink.addEventListener('mousedown', stopEvent, true);
     mapillaryLink.addEventListener('click', (e) => {

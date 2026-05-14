@@ -1,7 +1,13 @@
 // permalink.js - Permalink functionality for map state, routing, and context layers
 
 import { routeState } from '../routing/routeState.js';
-import { updateMarkers, getRandomWaypointSvg } from '../routing/routingUI.js';
+import {
+  updateMarkers,
+  getRandomWaypointSvg,
+  applyPhotoCoverageSettings,
+  syncPanoramaxLayers,
+  updateStrengthRowVisibility,
+} from '../routing/routingUI.js';
 import { updateWaypointsList } from '../routing/waypoints/waypointList.js';
 import { updateCoordinateTooltips } from '../routing/coordinates/coordinateTooltips.js';
 import { ensureCustomModel } from '../routing/customModel.js';
@@ -31,6 +37,8 @@ export class Permalink {
       if (!this.hasMapParam) {
         await this.fitMapToRouterBBox();
       }
+      // Sync panoramax layers after map is ready (needed when restored from URL)
+      syncPanoramaxLayers();
       if (this.pendingRouteCalculation) {
         this.calculateRouteFromURL();
       }
@@ -80,7 +88,12 @@ export class Permalink {
       endPoint: routeState.endPoint,
       selectedProfile: routeState.selectedProfile,
       currentEncodedType: routeState.currentEncodedType,
-      customModel: routeState.customModel
+      customModel: routeState.customModel,
+      avoidPhotoCoverage: routeState.avoidPhotoCoverage,
+      avoidPhotoCoverageOnly360: routeState.avoidPhotoCoverageOnly360,
+      photoCoverageStrength: routeState.photoCoverageStrength,
+      photoDateMin: routeState.photoDateMin,
+      photoDateMax: routeState.photoDateMax,
     };
   }
 
@@ -118,29 +131,19 @@ export class Permalink {
           el.textContent = t('photoCoverage.coverageDate').replace('{date}', dateStr);
           el.style.display = 'block';
         }
+
+        const maxInput = document.getElementById('photo-date-max');
+        if (maxInput && !maxInput.value) {
+          maxInput.value = data.coverage_date.substring(0, 10);
+          routeState.photoDateMax = maxInput.value;
+        }
       }
 
-      // Date range picker: show and populate only when date data is available
-      if (data.coverage_date_min || data.coverage_date) {
-        const dateRangeEl = document.getElementById('coverage-date-range');
-        if (dateRangeEl) dateRangeEl.style.display = 'block';
-
+      if (data.coverage_date_min) {
         const minInput = document.getElementById('photo-date-min');
-        const maxInput = document.getElementById('photo-date-max');
-
-        if (minInput) {
-          minInput.disabled = false;
-          if (data.coverage_date_min) {
-            minInput.value = data.coverage_date_min.substring(0, 10);
-            routeState.photoDateMin = minInput.value;
-          }
-        }
-        if (maxInput) {
-          maxInput.disabled = false;
-          if (data.coverage_date) {
-            maxInput.value = data.coverage_date.substring(0, 10);
-            routeState.photoDateMax = maxInput.value;
-          }
+        if (minInput && !minInput.value) {
+          minInput.value = data.coverage_date_min.substring(0, 10);
+          routeState.photoDateMin = minInput.value;
         }
       }
 
@@ -265,223 +268,223 @@ export class Permalink {
     });
   }
 
-  updateURL() {
-    if (this.isUpdating) return;
-    
+  buildParamParts() {
     const paramParts = [];
-    
+
     // Map state
     const center = this.map.getCenter();
     const zoom = this.map.getZoom();
-    const lng = Math.round(center.lng * 1000) / 1000;
-    const lat = Math.round(center.lat * 1000) / 1000;
-    const zoomRounded = Math.round(zoom * 10) / 10;
-    
-    paramParts.push(`map=${zoomRounded}/${lat}/${lng}`);
-    
-    // Route points (using / separator like map parameter)
+    paramParts.push(`map=${Math.round(zoom * 10) / 10}/${Math.round(center.lat * 1000) / 1000}/${Math.round(center.lng * 1000) / 1000}`);
+
+    // Route points
     if (routeState.startPoint) {
-      const [startLng, startLat] = routeState.startPoint;
-      paramParts.push(`start=${Math.round(startLat * 10000) / 10000}/${Math.round(startLng * 10000) / 10000}`);
+      const [lng, lat] = routeState.startPoint;
+      paramParts.push(`start=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
     }
-    
     if (routeState.endPoint) {
-      const [endLng, endLat] = routeState.endPoint;
-      paramParts.push(`end=${Math.round(endLat * 10000) / 10000}/${Math.round(endLng * 10000) / 10000}`);
+      const [lng, lat] = routeState.endPoint;
+      paramParts.push(`end=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
     }
-    
+
     // Waypoints
     routeState.waypoints.forEach(waypoint => {
-      // Support both array format [lng, lat] and object format {lng, lat, svgId}
-      let lng, lat;
+      let wLng, wLat;
       if (Array.isArray(waypoint)) {
-        [lng, lat] = waypoint;
+        [wLng, wLat] = waypoint;
       } else if (waypoint && typeof waypoint === 'object') {
-        lng = waypoint.lng;
-        lat = waypoint.lat;
-      } else {
-        return; // Skip invalid waypoints
-      }
-      paramParts.push(`waypoint=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
+        wLng = waypoint.lng;
+        wLat = waypoint.lat;
+      } else return;
+      paramParts.push(`waypoint=${Math.round(wLat * 10000) / 10000}/${Math.round(wLng * 10000) / 10000}`);
     });
-    
-    // Profile - include all profiles including car_customizable
+
+    // Profile
     if (routeState.selectedProfile) {
       paramParts.push(`profile=${encodeURIComponent(routeState.selectedProfile)}`);
     }
-    
-    
+
     // Encoded value type
     if (routeState.currentEncodedType) {
       paramParts.push(`encoded=${encodeURIComponent(routeState.currentEncodedType)}`);
     }
-    
-    const newURL = `${window.location.pathname}?${paramParts.join('&')}`;
+
+    // Photo coverage
+    if (routeState.avoidPhotoCoverage) paramParts.push('avoid_coverage=1');
+    if (routeState.avoidPhotoCoverageOnly360) paramParts.push('avoid_360=1');
+    if (routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360) {
+      paramParts.push(`coverage_strength=${routeState.photoCoverageStrength ?? 50}`);
+    }
+    if (routeState.photoDateMin) paramParts.push(`date_min=${routeState.photoDateMin}`);
+    if (routeState.photoDateMax) paramParts.push(`date_max=${routeState.photoDateMax}`);
+
+    return paramParts;
+  }
+
+  updateURL() {
+    if (this.isUpdating) return;
+    const newURL = `${window.location.pathname}?${this.buildParamParts().join('&')}`;
     window.history.replaceState({}, '', newURL);
   }
 
   async loadFromURL() {
     const params = new URLSearchParams(window.location.search);
-    
-    // Load map state
+
+    // ── SYNCHRONOUS SECTION ──────────────────────────────────────────────────
+    // Everything here runs before the first await, so routeState is fully
+    // populated before the map 'load' event can fire and call syncPanoramaxLayers.
+
+    // Map position
     const mapParam = params.get('map');
     if (mapParam) {
       const parts = mapParam.split('/');
       if (parts.length === 3) {
         const zoom = parseFloat(parts[0]);
-        const lat = parseFloat(parts[1]);
-        const lng = parseFloat(parts[2]);
-        
+        const lat  = parseFloat(parts[1]);
+        const lng  = parseFloat(parts[2]);
         if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lng)) {
           this.hasMapParam = true;
           this.isUpdating = true;
           this.map.setCenter([lng, lat]);
           this.map.setZoom(zoom);
-          setTimeout(() => {
-            this.isUpdating = false;
-          }, 100);
+          setTimeout(() => { this.isUpdating = false; }, 100);
         }
+      }
+    }
+    if (!this.hasMapParam) {
+      console.debug('[Permalink] No map param in URL, will fit router bbox once map is loaded');
+    }
+
+    // Start point
+    const startParam  = params.get('start');
+    const pointParams = params.getAll('point');
+    if (startParam) {
+      const sep = startParam.includes('/') ? '/' : ',';
+      const [lat, lng] = startParam.split(sep).map(parseFloat);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        routeState.startPoint = [lng, lat];
+        const el = document.getElementById('start-input');
+        if (el) el.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }
+    } else if (pointParams.length >= 1) {
+      const sep = pointParams[0].includes('/') ? '/' : ',';
+      const [lat, lng] = pointParams[0].split(sep).map(parseFloat);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        routeState.startPoint = [lng, lat];
+        const el = document.getElementById('start-input');
+        if (el) el.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       }
     }
 
-    if (!this.hasMapParam) {
-      // If no explicit map parameter is available in URL, map will be centered to router bbox on load.
-      console.debug('[Permalink] No map param in URL, will fit router bbox once map is loaded');
-    }
-    
-    // Load route points
-    // Support both 'start'/'end' format and 'point' format (GraphHopper style)
-    const startParam = params.get('start');
-    const pointParams = params.getAll('point');
-    
-    if (startParam) {
-      // Support both / and , separators (backwards compatibility)
-      const separator = startParam.includes('/') ? '/' : ',';
-      const [lat, lng] = startParam.split(separator).map(parseFloat);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        routeState.startPoint = [lng, lat];
-        // Update input field
-        const startInput = document.getElementById('start-input');
-        if (startInput) {
-          startInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
-      }
-    } else if (pointParams.length >= 1) {
-      // Support 'point' parameter format (GraphHopper style)
-      const separator = pointParams[0].includes('/') ? '/' : ',';
-      const [lat, lng] = pointParams[0].split(separator).map(parseFloat);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        routeState.startPoint = [lng, lat];
-        const startInput = document.getElementById('start-input');
-        if (startInput) {
-          startInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
-      }
-    }
-    
+    // End point
     const endParam = params.get('end');
     if (endParam) {
-      // Support both / and , separators (backwards compatibility)
-      const separator = endParam.includes('/') ? '/' : ',';
-      const [lat, lng] = endParam.split(separator).map(parseFloat);
+      const sep = endParam.includes('/') ? '/' : ',';
+      const [lat, lng] = endParam.split(sep).map(parseFloat);
       if (!isNaN(lat) && !isNaN(lng)) {
         routeState.endPoint = [lng, lat];
-        // Update input field
-        const endInput = document.getElementById('end-input');
-        if (endInput) {
-          endInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
+        const el = document.getElementById('end-input');
+        if (el) el.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       }
     } else if (pointParams.length >= 2) {
-      // Support 'point' parameter format (GraphHopper style)
-      const separator = pointParams[1].includes('/') ? '/' : ',';
-      const [lat, lng] = pointParams[1].split(separator).map(parseFloat);
+      const sep = pointParams[1].includes('/') ? '/' : ',';
+      const [lat, lng] = pointParams[1].split(sep).map(parseFloat);
       if (!isNaN(lat) && !isNaN(lng)) {
         routeState.endPoint = [lng, lat];
-        const endInput = document.getElementById('end-input');
-        if (endInput) {
-          endInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
+        const el = document.getElementById('end-input');
+        if (el) el.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       }
     }
-    
-    // Load waypoints
+
+    // Waypoints (coordinates only — addresses fetched async below)
     const waypointParams = params.getAll('waypoint');
     routeState.waypoints = [];
     routeState.waypointAddresses = [];
-    
-    // Load waypoints and fetch addresses asynchronously
-    const waypointPromises = waypointParams.map(async (waypointParam) => {
-      // Support both / and , separators (backwards compatibility)
-      const separator = waypointParam.includes('/') ? '/' : ',';
-      const [lat, lng] = waypointParam.split(separator).map(parseFloat);
+    waypointParams.forEach(wp => {
+      const sep = wp.includes('/') ? '/' : ',';
+      const [lat, lng] = wp.split(sep).map(parseFloat);
       if (!isNaN(lat) && !isNaN(lng)) {
-        // Create waypoint object with random SVG (same as when adding new waypoint)
-        routeState.waypoints.push({
-          lng: lng,
-          lat: lat,
-          svgId: getRandomWaypointSvg()
-        });
-        
-        // Fetch address for tooltip
-        const { reverseGeocode } = await import('../utils/geocoder.js');
-        const address = await reverseGeocode(lng, lat);
-        routeState.waypointAddresses.push(address);
+        routeState.waypoints.push({ lng, lat, svgId: getRandomWaypointSvg() });
       }
     });
-    
-    // Wait for all waypoint addresses to be fetched
-    await Promise.all(waypointPromises);
-    
-    // Also fetch addresses for start and end points if they exist
-    if (routeState.startPoint) {
-      const { reverseGeocode } = await import('../utils/geocoder.js');
-      routeState.startAddress = await reverseGeocode(routeState.startPoint[0], routeState.startPoint[1]);
-    }
-    
-    if (routeState.endPoint) {
-      const { reverseGeocode } = await import('../utils/geocoder.js');
-      routeState.endAddress = await reverseGeocode(routeState.endPoint[0], routeState.endPoint[1]);
-    }
-    
-    // Update markers if points were loaded
-    if (routeState.startPoint || routeState.endPoint || routeState.waypoints.length > 0) {
-      updateMarkers(this.map);
-      updateWaypointsList();
-      updateCoordinateTooltips();
-    }
-    
-    // Restore profile from URL (default: bike_customizable)
-    const profileParam = params.get('profile');
+
+    // Profile
+    const profileParam  = params.get('profile');
     const validProfiles = ['bike_customizable', 'car_customizable', 'foot'];
     const profile = validProfiles.includes(profileParam) ? profileParam : 'bike_customizable';
     routeState.selectedProfile = profile;
     routeState.customModel = ensureCustomModel(null, profile);
-
-    // Update profile button UI to match restored profile
     document.querySelectorAll('.profile-btn').forEach(btn => {
       btn.classList.toggle('selected', btn.dataset.profile === profile);
     });
-    
-    // Load encoded value type
+
+    // Encoded value type
     const encodedParam = params.get('encoded');
     if (encodedParam) {
       routeState.currentEncodedType = encodedParam;
-      // Update select dropdown
       const encodedSelect = document.getElementById('heightgraph-encoded-select');
-      if (encodedSelect) {
-        encodedSelect.value = encodedParam;
-      }
+      if (encodedSelect) encodedSelect.value = encodedParam;
     }
-    
-    // If both start and end points are loaded, mark for route calculation
-    // Route will be calculated after map is loaded and routing sources exist
+
+    // Photo coverage settings
+    const avoidCoverage      = params.get('avoid_coverage') === '1';
+    const avoid360           = params.get('avoid_360') === '1';
+    const coverageStrengthParam = params.get('coverage_strength');
+    const dateMinParam       = params.get('date_min');
+    const dateMaxParam       = params.get('date_max');
+
+    routeState.avoidPhotoCoverage      = avoidCoverage;
+    routeState.avoidPhotoCoverageOnly360 = avoid360;
+    if (coverageStrengthParam !== null) {
+      routeState.photoCoverageStrength = parseFloat(coverageStrengthParam);
+    }
+    if (dateMinParam) routeState.photoDateMin = dateMinParam;
+    if (dateMaxParam) routeState.photoDateMax = dateMaxParam;
+
+    const coverageSwitch  = document.getElementById('avoid-photo-coverage');
+    if (coverageSwitch)  coverageSwitch.checked = avoidCoverage;
+    const coverage360Switch = document.getElementById('avoid-photo-coverage-360');
+    if (coverage360Switch) coverage360Switch.checked = avoid360;
+    const strengthSlider  = document.getElementById('photo-coverage-strength');
+    if (strengthSlider)  strengthSlider.value = routeState.photoCoverageStrength ?? 50;
+    const dateMinInput = document.getElementById('photo-date-min');
+    if (dateMinInput && dateMinParam) dateMinInput.value = dateMinParam;
+    const dateMaxInput = document.getElementById('photo-date-max');
+    if (dateMaxInput && dateMaxParam) dateMaxInput.value = dateMaxParam;
+
+    if (avoidCoverage || avoid360) {
+      applyPhotoCoverageSettings();
+      updateStrengthRowVisibility();
+    }
+
+    // Route calculation flag (map layers sync happens in the 'load' handler)
     if (routeState.startPoint && routeState.endPoint) {
       this.pendingRouteCalculation = true;
-      // If map is already loaded, calculate immediately
       if (this.map.loaded()) {
         this.calculateRouteFromURL();
       }
+    }
+
+    // ── ASYNC SECTION ────────────────────────────────────────────────────────
+    // Geocoding only — map layer state is already fully set above.
+
+    const { reverseGeocode } = await import('../utils/geocoder.js');
+
+    const waypointAddresses = await Promise.all(
+      routeState.waypoints.map(wp => reverseGeocode(wp.lng, wp.lat))
+    );
+    routeState.waypointAddresses = waypointAddresses;
+
+    if (routeState.startPoint) {
+      routeState.startAddress = await reverseGeocode(routeState.startPoint[0], routeState.startPoint[1]);
+    }
+    if (routeState.endPoint) {
+      routeState.endAddress = await reverseGeocode(routeState.endPoint[0], routeState.endPoint[1]);
+    }
+
+    if (routeState.startPoint || routeState.endPoint || routeState.waypoints.length > 0) {
+      updateMarkers(this.map);
+      updateWaypointsList();
+      updateCoordinateTooltips();
     }
   }
 
@@ -530,49 +533,7 @@ export class Permalink {
 
   // Method to generate shareable URL
   getShareableURL() {
-    const paramParts = [];
-    
-    const center = this.map.getCenter();
-    const zoom = this.map.getZoom();
-    const mapParam = `${Math.round(zoom * 10) / 10}/${Math.round(center.lat * 1000) / 1000}/${Math.round(center.lng * 1000) / 1000}`;
-    paramParts.push(`map=${mapParam}`);
-    
-    if (routeState.startPoint) {
-      const [lng, lat] = routeState.startPoint;
-      paramParts.push(`start=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
-    }
-    
-    if (routeState.endPoint) {
-      const [lng, lat] = routeState.endPoint;
-      paramParts.push(`end=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
-    }
-    
-    // Add waypoints
-    routeState.waypoints.forEach(waypoint => {
-      // Support both array format [lng, lat] and object format {lng, lat, svgId}
-      let lng, lat;
-      if (Array.isArray(waypoint)) {
-        [lng, lat] = waypoint;
-      } else if (waypoint && typeof waypoint === 'object') {
-        lng = waypoint.lng;
-        lat = waypoint.lat;
-      } else {
-        return; // Skip invalid waypoints
-      }
-      paramParts.push(`waypoint=${Math.round(lat * 10000) / 10000}/${Math.round(lng * 10000) / 10000}`);
-    });
-    
-    // Profile - include all profiles including car_customizable
-    if (routeState.selectedProfile) {
-      paramParts.push(`profile=${encodeURIComponent(routeState.selectedProfile)}`);
-    }
-    
-    
-    if (routeState.currentEncodedType) {
-      paramParts.push(`encoded=${encodeURIComponent(routeState.currentEncodedType)}`);
-    }
-    
-    return `${window.location.origin}${window.location.pathname}?${paramParts.join('&')}`;
+    return `${window.location.origin}${window.location.pathname}?${this.buildParamParts().join('&')}`;
   }
 }
 

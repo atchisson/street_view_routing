@@ -205,34 +205,81 @@
         </button>
       </div>
       
-        <div id="photo-coverage-container" class="photo-coverage-container" style="margin-top: 8px;">
-          <div class="photo-coverage-wrapper">
-            <label class="switch-toggle photo-coverage-switch">
-              <input type="checkbox" id="avoid-photo-coverage" />
-              <span class="switch-slider"></span>
-            </label>
-            <span class="photo-coverage-text" data-i18n="photoCoverage.avoidCoverage">Avoid photo coverage</span>
-          </div>
-          <div class="photo-coverage-wrapper">
-            <label class="switch-toggle photo-coverage-switch">
-              <input type="checkbox" id="avoid-photo-coverage-360" />
-              <span class="switch-slider"></span>
-            </label>
-            <span class="photo-coverage-text" data-i18n="photoCoverage.avoid360Coverage">Avoid 360° photo coverage</span>
-          </div>
-          <div id="coverage-date-info" class="coverage-date-info" style="display: none;"></div>
-          <div id="coverage-date-range" class="coverage-date-range" style="display: none;">
-            <div class="date-range-row">
-              <span class="date-range-label" data-i18n="photoCoverage.from">From</span>
-              <input type="date" id="photo-date-min" disabled>
-              <span class="date-range-label" data-i18n="photoCoverage.to">to</span>
-              <input type="date" id="photo-date-max" disabled>
+        <!-- Photo coverage – Panoramax accordion -->
+        <div id="pano-accordion" class="provider-accordion">
+          <div class="provider-header" id="pano-accordion-header">
+            <div class="provider-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
             </div>
+            <span class="provider-name">Panoramax</span>
+            <span class="provider-badge">ON</span>
+            <svg class="provider-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          <div class="photo-coverage-strength-row" id="photo-coverage-strength-row" style="display: none;">
-            <span class="strength-label" data-i18n="photoCoverage.weak">Weak</span>
-            <input type="range" id="photo-coverage-strength" min="0" max="100" value="50" class="photo-coverage-slider" />
-            <span class="strength-label" data-i18n="photoCoverage.strong">Strong</span>
+
+          <div class="provider-body">
+            <!-- Hidden checkboxes keep original IDs — JS event handlers unchanged -->
+            <input type="checkbox" id="avoid-photo-coverage" style="display:none">
+            <input type="checkbox" id="avoid-photo-coverage-360" style="display:none">
+
+            <div class="provider-pills">
+              <div class="ppill" id="ppill-all">
+                <div class="ppill-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                </div>
+                <div class="ppill-text">
+                  <div class="ppill-name" data-i18n="photoCoverage.allPhotos">Toutes les photos</div>
+                  <div class="ppill-sub">Flat + 360°</div>
+                </div>
+                <div class="ppill-dot"></div>
+              </div>
+
+              <div class="ppill" id="ppill-360">
+                <div class="ppill-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h4m12 0h4M12 2v4m0 12v4"/>
+                  </svg>
+                </div>
+                <div class="ppill-text">
+                  <div class="ppill-name" data-i18n="photoCoverage.photos360">360° uniquement</div>
+                  <div class="ppill-sub" data-i18n="photoCoverage.photos360Sub">Photos sphériques</div>
+                </div>
+                <div class="ppill-dot"></div>
+              </div>
+            </div>
+
+            <div class="provider-options" id="pano-options">
+              <div id="coverage-date-info" class="coverage-date-info" style="display:none;"></div>
+              <div>
+                <div class="opt-section-title" data-i18n="photoCoverage.period">Période</div>
+                <div class="opt-dates-grid">
+                  <div class="opt-date-field">
+                    <label data-i18n="photoCoverage.from">Du</label>
+                    <input type="date" id="photo-date-min">
+                  </div>
+                  <div class="opt-date-field">
+                    <label data-i18n="photoCoverage.to">au</label>
+                    <input type="date" id="photo-date-max">
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="opt-section-title" data-i18n="photoCoverage.strength">Pondération</div>
+                <div class="opt-strength-row">
+                  <span class="opt-strength-ends" data-i18n="photoCoverage.weak">Faible</span>
+                  <input type="range" id="photo-coverage-strength" min="0" max="100" value="50" class="opt-slider">
+                  <span class="opt-strength-ends" data-i18n="photoCoverage.strong">Fort</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -242,7 +289,7 @@
         <div class="heightgraph-header">
           <span data-i18n="heightgraph.title">Elevation Profile</span>
           <select id="heightgraph-encoded-select" class="heightgraph-select">
-            <option value="surface" data-i18n="heightgraph.surface">Surface</option>
+            <option value="none" data-i18n="heightgraph.none">None</option>
             <option value="road_class" data-i18n="heightgraph.roadClass">Road Class</option>
           </select>
         </div>
@@ -399,12 +446,12 @@
       </svg>
       <span data-i18n="contextMenu.osmQuery">OSM object query</span>
     </a>
-    <a class="context-menu-item" id="context-menu-mapillary" target="_blank" rel="noopener noreferrer">
+    <a class="context-menu-item" id="context-menu-panoramax" target="_blank" rel="noopener noreferrer">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
         <circle cx="12" cy="13" r="4"></circle>
       </svg>
-      <span data-i18n="contextMenu.mapillary">Open in Mapillary</span>
+      <span data-i18n="contextMenu.panoramax">Open in Panoramax</span>
     </a>
   </div>
 
