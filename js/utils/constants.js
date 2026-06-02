@@ -64,7 +64,6 @@ export const UI_IDS = {
   END_INPUT: 'end-input',
   CALCULATE_BTN: 'calculate-route',
   CLEAR_BTN: 'clear-route',
-  HIDE_BTN: 'hide-route',
   EXPORT_GPX_BTN: 'export-gpx',
   ROUTE_INFO: 'route-info',
   HEIGHTGRAPH_CONTAINER: 'heightgraph-container',

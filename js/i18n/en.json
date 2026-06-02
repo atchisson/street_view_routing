@@ -16,7 +16,6 @@
     "calculate": "Calculate route",
     "calculating": "Calculating...",
     "calculateError": "Error calculating route",
-    "toggleVisibility": "Hide/Show",
     "exportGpx": "Export GPX",
     "clear": "Clear",
     "mapillaryWeight": "Mapillary Weight:",
@@ -24,8 +23,8 @@
     "avoidPushing": "Avoid pushing bike",
     "collapsePanel": "Collapse",
     "expandPanel": "Expand",
-    "hide": "Hide",
-    "show": "Show",
+    "openPanel": "Route",
+    "closePanel": "Close",
     "pointNames": {
       "start": "Start point",
       "end": "End point",

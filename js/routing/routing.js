@@ -1007,16 +1007,16 @@ export async function calculateRoute(map, start, end, waypoints = []) {
       }, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
       
       // Calculate responsive padding based on viewport size
-      const isMobile = window.innerWidth < 768;
+      const isMobile = window.innerWidth <= 768;
       let padding;
       
       if (isMobile) {
-        // On mobile: minimal padding, panels are usually collapsed or smaller
+        // On mobile the route is shown above the half-open bottom sheet (~45% of height).
         padding = {
-          top: 20,
-          right: 20,
-          bottom: 20,
-          left: 20
+          top: 30,
+          right: 30,
+          bottom: Math.round(window.innerHeight * 0.45) + 30,
+          left: 30
         };
       } else {
         // On desktop: account for routing panel width
@@ -1043,6 +1043,9 @@ export async function calculateRoute(map, start, end, waypoints = []) {
       }
       
       map.fitBounds(bounds, { padding });
+
+      // Notify the mobile bottom-sheet that a route is now displayed.
+      window.dispatchEvent(new CustomEvent('routeDisplayed'));
     } else {
       throw new Error(ERROR_MESSAGES.NO_ROUTE_FOUND);
     }
@@ -1065,6 +1068,9 @@ export async function calculateRoute(map, start, end, waypoints = []) {
 }
 
 export function clearRoute(map) {
+  // Notify the mobile bottom-sheet that the route is gone.
+  window.dispatchEvent(new CustomEvent('routeCleared'));
+
   // Cleanup heightgraph event handlers
   cleanupHeightgraphHandlers();
   

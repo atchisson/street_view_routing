@@ -7,6 +7,8 @@ import { setupRouting } from './js/routing/routing.js';
 // 📦 UI & Interaktion
 import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupPanelPositioning } from './js/ui/panelPositioning.js';
+import { setupMobileSheet } from './js/ui/mobileSheet.js';
+import { setupAttributionLink } from './js/ui/attributionLink.js';
 import { setupToggleHandlers } from './js/ui/toggleHandlers.js';
 import { setupContextMenu } from './js/ui/contextMenu.js';
 
@@ -101,7 +103,8 @@ async function initMap() {
     setupRouting(map);
     setupContextMenu(map);
     updateExternalLinks(map);
-    
+    setupAttributionLink();
+
     // Apply initial theme based on system preference or manual override
     applyInitialMapTheme(map);
   });
@@ -177,8 +180,10 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setupToggleHandlers();
     setupPanelPositioning();
+    setupMobileSheet();
   });
 } else {
   setupToggleHandlers();
   setupPanelPositioning();
+  setupMobileSheet();
 }

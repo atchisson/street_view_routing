@@ -767,30 +767,47 @@ code {
   position: relative;
 }
 
+/* Desktop : centre la pill d'attribution dans la marge sous le panneau. */
+@media (min-width: 769px) {
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right {
+    bottom: 10px;
+  }
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .geocoder {
     position: absolute;
-    top: auto;
-    bottom: 40px; /* Above attribution (~30px) with some padding */
-    left: auto;
+    top: 10px;
+    bottom: auto;
+    left: 10px;
     right: 10px;
-    width: calc(100vw - 20px);
-    max-width: calc(100vw - 200px); /* Leave space for controls on left */
-    z-index: 2; /* Above attribution, below panels */
+    width: auto;
+    max-width: none;
+    z-index: 2; /* Above attribution, below the sheet */
   }
-  
+
   .geocoder-results {
     max-height: 250px;
-    /* Position results above input when open */
-    position: absolute;
-    bottom: 100%;
-    margin-bottom: 4px;
-    margin-top: 0;
+    /* Open downward: on mobile the geocoder sits at the top */
+    position: static;
+    bottom: auto;
+    margin-bottom: 0;
+    margin-top: 4px;
   }
   
   .routing-input-geocoder-results {
     max-height: 200px;
+  }
+
+  /* Attribution MapLibre : sous la barre de recherche, avec le même écart (10px)
+     que la marge barre↔bord. 10px (marge haute) + ~36px (hauteur barre) + 10px (écart). */
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right {
+    bottom: auto;
+    top: 56px;
+    z-index: 3;
   }
 }
 
@@ -1084,7 +1101,8 @@ code {
   right: 5px;
   width: 320px;
   max-width: calc(100% - 10px);
-  max-height: calc(100vh - 10px);
+  /* Réserve une marge en bas pour la pill d'attribution, centrée dans l'espace restant. */
+  max-height: calc(100vh - 67px);
   background: var(--bg-primary);
   border-radius: 8px;
   box-shadow: 0 2px 8px var(--shadow-md);
@@ -1093,7 +1111,9 @@ code {
   transition: width 0.3s ease, max-height 0.3s ease, background-color 0.3s ease;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* Tout le panneau scrolle d'un bloc (routing-content + route-info + heightgraph). */
+  overflow-y: auto;
+  overflow-x: hidden;
   color: var(--text-primary);
 }
 
@@ -1103,7 +1123,10 @@ code {
   visibility: visible !important;
 }
 
-.routing-panel.collapsed .routing-content {
+.routing-panel.collapsed .routing-content,
+.routing-panel.collapsed #route-info,
+.routing-panel.collapsed #heightgraph-container,
+.routing-panel.collapsed .github-links {
   display: none !important;
 }
 
@@ -1156,6 +1179,10 @@ select.lang-switcher {
   gap: 12px;
   background: var(--bg-primary);
   color: var(--text-primary);
+  /* Reste visible en haut pendant que le panneau scrolle (le bouton réduire reste accessible). */
+  position: sticky;
+  top: 0;
+  z-index: 3;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -1260,6 +1287,7 @@ select.lang-switcher {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-left: auto; /* toujours aligné à droite (y compris quand le panneau n'est pas réduit) */
 }
 
 .btn-close svg {
@@ -1278,31 +1306,30 @@ select.lang-switcher {
 .routing-content {
   padding: 16px;
   display: block;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
+  /* Pas de scroll interne : c'est .routing-panel qui scrolle en entier,
+     pour que route-info et heightgraph (ses frères) défilent avec lui. */
+  flex: 0 0 auto;
+  overflow: visible;
   background: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.routing-content::-webkit-scrollbar {
+.routing-panel::-webkit-scrollbar {
   width: 8px;
 }
 
-.routing-content::-webkit-scrollbar-track {
+.routing-panel::-webkit-scrollbar-track {
   background: var(--bg-tertiary);
   border-radius: 4px;
 }
 
-.routing-content::-webkit-scrollbar-thumb {
+.routing-panel::-webkit-scrollbar-thumb {
   background: var(--border-secondary);
   border-radius: 4px;
 }
 
-.routing-content::-webkit-scrollbar-thumb:hover {
+.routing-panel::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
 }
 
@@ -1957,6 +1984,7 @@ html[data-theme="dark"] .provider-accordion.active .provider-icon {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-top: 8px;
 }
 
 .ppill {
@@ -2329,7 +2357,7 @@ html[data-theme="dark"] .ppill.active .ppill-name {
 
 .route-info-compact {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 12px 24px;
   padding: 10px 12px;
   background: var(--bg-secondary);
@@ -2653,9 +2681,6 @@ html[data-theme="dark"] .ppill.active .ppill-name {
 
 /* ───── Mobile Optimizations ───── */
 @media (max-width: 768px) {
-  /* Panels: Full width on mobile, less padding */
-  .routing-panel,
-
   /* Larger touch targets for buttons */
   .profile-btn {
     min-width: 44px;
@@ -2746,9 +2771,6 @@ html[data-theme="dark"] .ppill.active .ppill-name {
     flex-wrap: wrap;
   }
   
-  /* Ensure panels don't overlap with bottom geocoder and controls */
-  .routing-panel,
-
   /* Smaller basemap thumbs on mobile */
   .basemap-thumb {
     width: 50px;
@@ -2799,8 +2821,6 @@ html[data-theme="dark"] .ppill.active .ppill-name {
 
 /* Very small screens (phones in portrait) */
 @media (max-width: 480px) {
-  .routing-panel,
-
   .routing-header {
     padding: 12px 10px;
   }
@@ -3037,5 +3057,129 @@ html[data-theme="dark"] .pano-date-toast {
     background: #334155;
     color: #f8fafc;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ───── Mobile bottom-sheet : éléments masqués en desktop ───── */
+.sheet-grabber {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* La feuille : ancrée en bas, pleine largeur, glissable */
+  .routing-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -4px 18px var(--shadow-md);
+    transform: translateY(calc(100% - 28px)); /* défaut = bandeau fin visible avant init JS */
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    /* Tout le panneau scrolle (et pas seulement .routing-content) : le profil alti
+       trop grand reste atteignable. Le grabber est sticky pour garder le ✕ accessible. */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    z-index: 6; /* Au-dessus du geocoder (z-index 2) : la feuille plein écran le recouvre */
+  }
+
+  /* Deux positions : bandeau fin (peek) toujours visible, et plein écran. */
+  .routing-panel.sheet-peek {
+    transform: translateY(calc(100% - 28px));
+    overflow: hidden; /* pas de scroll en mode bandeau */
+  }
+  .routing-panel.sheet-peek .sheet-grabber {
+    min-height: 28px;
+    padding: 8px 0;
+  }
+  .routing-panel.sheet-full { transform: translateY(0); border-radius: 0; }
+
+  .routing-panel.sheet-dragging { transition: none; }
+
+  .sheet-grabber {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    position: sticky; /* reste en haut pendant que le panneau scrolle */
+    top: 0;
+    z-index: 2;
+    background: var(--bg-primary);
+    border-radius: 18px 18px 0 0;
+    padding: 9px 0 7px;
+    min-height: 44px; /* hauteur en plein écran (contient le ✕) */
+    flex-shrink: 0;
+    touch-action: none;
+    cursor: grab;
+  }
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--border-secondary, #cbd5e1);
+  }
+  .sheet-peek-label {
+    display: none; /* libellé masqué : bandeau réduit à la poignée */
+  }
+  .sheet-close {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%); /* aligné verticalement avec la poignée centrée */
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 9px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* En bandeau, le ✕ est caché (rien à fermer) ; il n'apparaît qu'en plein écran. */
+  .routing-panel.sheet-peek .sheet-close { display: none; }
+
+  .routing-panel .routing-header {
+    display: none;
+  }
+
+  .routing-content {
+    /* Pas de scroll interne : c'est .routing-panel qui scrolle en entier.
+       On annule explicitement overflow/flex/min-height hérités de la règle de base. */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: visible;
+    flex: none;
+    min-height: auto;
+    height: auto;
+  }
+
+  /* Contrôles carte bas-gauche : au-dessus du bandeau en peek, masqués en plein écran. */
+  .routing-panel.sheet-peek ~ #bottom-left-ui-container {
+    bottom: 40px;
+    transition: bottom 0.3s ease;
+  }
+  .routing-panel.sheet-full ~ #bottom-left-ui-container {
+    display: none;
+  }
+
+  /* L'attribution déplacée en haut doit rester cliquable : au-dessus de la carte.
+     Override du z-index:0 !important défini plus haut (pour l'ancien panneau). */
+  .maplibregl-ctrl-attrib {
+    z-index: 3 !important;
+  }
+  .maplibregl-ctrl-attrib a {
+    pointer-events: auto !important;
   }
 }

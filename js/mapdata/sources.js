@@ -9,7 +9,7 @@ export function addBasicSources(map) {
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       ],
       tileSize: 256,
-      attribution: "© OpenStreetMap contributors"
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'
     });
   }
 

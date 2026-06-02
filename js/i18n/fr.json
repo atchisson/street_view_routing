@@ -16,7 +16,6 @@
     "calculate": "Calculer l'itinéraire",
     "calculating": "Calcul en cours...",
     "calculateError": "Erreur lors du calcul de l'itinéraire",
-    "toggleVisibility": "Masquer/Afficher",
     "exportGpx": "Exporter en GPX",
     "clear": "Effacer",
     "mapillaryWeight": "Pondération Mapillary :",
@@ -24,8 +23,8 @@
     "avoidPushing": "Éviter de pousser le vélo",
     "collapsePanel": "Réduire",
     "expandPanel": "Développer",
-    "hide": "Masquer",
-    "show": "Afficher",
+    "openPanel": "Itinéraire",
+    "closePanel": "Fermer",
     "pointNames": {
       "start": "Point de départ",
       "end": "Point d'arrivée",

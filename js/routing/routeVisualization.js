@@ -75,11 +75,6 @@ export function setupRouteHover(map) {
   });
   
   map.on('mousemove', 'route-layer', (e) => {
-    if (window.routeIsHidden) {
-      popup.remove();
-      return;
-    }
-    
     if (routeState.currentRouteData && e.features && e.features.length > 0) {
       // Use original coordinates from routeState, not segment coordinates
       const { coordinates: originalCoordinates } = routeState.currentRouteData;

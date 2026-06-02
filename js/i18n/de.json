@@ -16,7 +16,6 @@
     "calculate": "Route berechnen",
     "calculating": "Berechne...",
     "calculateError": "Fehler beim Berechnen der Route",
-    "toggleVisibility": "Ausblenden/Einblenden",
     "exportGpx": "GPX exportieren",
     "clear": "Löschen",
     "mapillaryWeight": "Mapillary Weight:",
@@ -24,8 +23,8 @@
     "avoidPushing": "Schieben verhindern",
     "collapsePanel": "Einklappen",
     "expandPanel": "Ausklappen",
-    "hide": "Ausblenden",
-    "show": "Einblenden",
+    "openPanel": "Route",
+    "closePanel": "Schließen",
     "pointNames": {
       "start": "Startpunkt",
       "end": "Endpunkt",
