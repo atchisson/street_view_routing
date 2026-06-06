@@ -392,8 +392,20 @@ export function getPhotoCoverageOnly360Multiplier(customModel) {
  * @returns {Object} Updated custom model
  */
 export function updateUnpavedRoadsRule(customModel, avoidUnpavedRoads) {
-  // Surface-based routing is not supported by this router; ignore unpaved toggles.
-  // This avoids invalid GraphHopper expressions if 'surface' is unknown.
+  if (!customModel || !customModel.priority) return customModel;
+
+  const idx = customModel.priority.findIndex(
+    r => r.if && r.if.includes('road_class == TRACK || road_class == PATH')
+  );
+  if (idx !== -1) customModel.priority.splice(idx, 1);
+
+  if (avoidUnpavedRoads) {
+    customModel.priority.push({
+      "if": "road_class == TRACK || road_class == PATH || road_class == BRIDLEWAY",
+      "multiply_by": 0
+    });
+  }
+
   return customModel;
 }
 

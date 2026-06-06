@@ -6,6 +6,7 @@ import {
   ensureCustomModel,
   updatePhotoCoverageRule,
   updatePhotoCoverageOnly360Rule,
+  updateUnpavedRoadsRule,
 } from './customModel.js';
 import { setupRoutingInputGeocoder, reverseGeocode } from '../utils/geocoder.js';
 import { ERROR_MESSAGES } from '../utils/constants.js';
@@ -95,6 +96,11 @@ export function applyPhotoCoverageSettings() {
     dateMin,
     dateMax
   );
+}
+
+export function applyUnpavedRoadsSettings() {
+  if (!routeState.customModel) return;
+  routeState.customModel = updateUnpavedRoadsRule(routeState.customModel, routeState.avoidUnpavedRoads);
 }
 
 function applyPanoramaxDateFilter() {
@@ -406,6 +412,19 @@ export function setupUIHandlers(map) {
         applyPhotoCoverageSettings();
         recalculateRouteIfReady();
       }
+    });
+  }
+
+  // Off-road toggle pill
+  const ppillOffroad = document.getElementById('ppill-offroad');
+  if (ppillOffroad) {
+    ppillOffroad.addEventListener('click', () => {
+      routeState.avoidUnpavedRoads = !routeState.avoidUnpavedRoads;
+      trackEvent('Route', routeState.avoidUnpavedRoads ? 'AvoidOffroad' : 'AllowOffroad');
+      ppillOffroad.classList.toggle('active', routeState.avoidUnpavedRoads);
+      if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
+      applyUnpavedRoadsSettings();
+      recalculateRouteIfReady();
     });
   }
 

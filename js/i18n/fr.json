@@ -20,6 +20,8 @@
     "clear": "Effacer",
     "mapillaryWeight": "Pondération Mapillary :",
     "unpavedRoads": "Éviter les routes non revêtues",
+    "pavedOnly": "Revêtu uniquement",
+    "pavedOnlySub": "Éviter pistes et chemins",
     "avoidPushing": "Éviter de pousser le vélo",
     "collapsePanel": "Réduire",
     "expandPanel": "Développer",
