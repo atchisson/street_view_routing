@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "version:update": "node -e \"const fs=require('fs'),cp=require('child_process');const sha=cp.execSync('git rev-parse --short HEAD').toString().trim();const f='js/config/config.public.js';fs.writeFileSync(f,fs.readFileSync(f,'utf8').replace(/APP_VERSION = '[^']*'/,\\\"APP_VERSION = '\\\" + sha + \\\"'\\\"));console.log('APP_VERSION set to', sha);\""
+  }
+}
