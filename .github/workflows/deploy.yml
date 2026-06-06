@@ -24,10 +24,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Inject git SHA as APP_VERSION
-        run: |
-          find . -not -path './.git/*' \
-            \( -name '*.js' -o -name '*.html' \) \
-            -exec sed -i "s/__APP_VERSION__/${{ github.sha }}/g" {} +
+        run: sed -i "s/__APP_VERSION__/${{ github.sha }}/g" index.html js/config/config.public.js
 
       - uses: actions/configure-pages@v5
 
