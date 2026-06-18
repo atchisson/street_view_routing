@@ -614,9 +614,49 @@ code {
 }
 
 /* ────────────── Photon Geocoder ────────────── */
+/* ───── Maintenance banner ───── */
+.maintenance-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500; /* au-dessus des contrôles carte, sous les menus contextuels */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: #f97316;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.maintenance-banner-text {
+  flex: 1;
+}
+
+.maintenance-banner-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.maintenance-banner-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .geocoder {
   position: absolute;
-  top: 10px;
+  top: calc(10px + var(--maint-h, 0px)); /* décalé sous le bandeau de maintenance s'il est présent */
   left: 10px;
   z-index: 1;
   width: 320px;
@@ -779,7 +819,7 @@ code {
 @media (max-width: 768px) {
   .geocoder {
     position: absolute;
-    top: 10px;
+    top: calc(10px + var(--maint-h, 0px)); /* décalé sous le bandeau de maintenance s'il est présent */
     bottom: auto;
     left: 10px;
     right: 10px;
@@ -806,7 +846,7 @@ code {
   .maplibregl-ctrl-bottom-left,
   .maplibregl-ctrl-bottom-right {
     bottom: auto;
-    top: 56px;
+    top: calc(56px + var(--maint-h, 0px)); /* sous la barre de recherche, elle-même sous le bandeau */
     z-index: 3;
   }
 }
@@ -1097,7 +1137,7 @@ code {
 /* ───── Routing Panel ───── */
 .routing-panel {
   position: absolute;
-  top: 5px;
+  top: calc(5px + var(--maint-h, 0px)); /* décalé sous le bandeau de maintenance s'il est présent */
   right: 5px;
   width: 320px;
   max-width: calc(100% - 10px);

@@ -9,6 +9,7 @@ import { setupBaseLayerControls } from './js/ui/setupBaseLayerControls.js';
 import { setupPanelPositioning } from './js/ui/panelPositioning.js';
 import { setupMobileSheet } from './js/ui/mobileSheet.js';
 import { setupAttributionLink } from './js/ui/attributionLink.js';
+import { setupMaintenanceBanner } from './js/ui/maintenanceBanner.js';
 import { setupToggleHandlers } from './js/ui/toggleHandlers.js';
 import { setupContextMenu } from './js/ui/contextMenu.js';
 
@@ -181,9 +182,11 @@ if (document.readyState === 'loading') {
     setupToggleHandlers();
     setupPanelPositioning();
     setupMobileSheet();
+    setupMaintenanceBanner();
   });
 } else {
   setupToggleHandlers();
   setupPanelPositioning();
   setupMobileSheet();
+  setupMaintenanceBanner();
 }

@@ -1,5 +1,6 @@
 // geocoder.js
 import { t, getLang } from '../i18n/i18n.js';
+import { trackEvent } from '../analytics.js';
 
 export function setupPhotonGeocoder(map) {
   const container = document.createElement("div");
@@ -82,6 +83,8 @@ export function setupPhotonGeocoder(map) {
   }
 
   function selectResult(feature, index = -1) {
+    // Track search usage (result type only — no personal address text).
+    trackEvent('Search', 'SelectResult', feature?.properties?.osm_value);
     const [lng, lat] = feature.geometry.coordinates;
     if (marker) marker.remove();
     marker = new maplibregl.Marker({
