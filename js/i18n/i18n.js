@@ -1,6 +1,8 @@
 // Internationalization module
 // Supports runtime language switching with JSON translation files
 
+import { APP_VERSION } from '../config/config.public.js';
+
 const SUPPORTED_LANGS = new Set(['de', 'en', 'fr']);
 const DEFAULT_LANG = 'en';
 
@@ -33,7 +35,7 @@ export async function initI18n() {
 
 async function loadTranslations(lang) {
   try {
-    const res = await fetch(`./js/i18n/${lang}.json`);
+    const res = await fetch(`./js/i18n/${lang}.json?v=${APP_VERSION}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     translations = await res.json();
   } catch (e) {

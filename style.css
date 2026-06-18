@@ -218,6 +218,35 @@ code {
   border-top-color: var(--bg-primary);
 }
 
+/* Generic tooltip via data-tooltip attribute */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #111);
+  border: 1px solid var(--border-secondary, #d1d5db);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  min-width: max-content;
+}
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
 /* MapLibre Popup (route hover tooltip) - Dark Mode Support */
 .maplibregl-popup-content {
   background-color: var(--bg-primary) !important;

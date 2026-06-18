@@ -9,7 +9,7 @@
   <!-- <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' /> -->
   <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.css' />
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=__APP_VERSION__" />
 
   <!-- Matomo – cookieless, no consent banner needed (CNIL exemption) -->
   <script>
@@ -116,6 +116,22 @@
           </svg>
           <span data-i18n="profiles.foot">Walking</span>
         </button>
+      </div>
+
+      <!-- Off-road toggle -->
+      <div class="provider-pills" style="margin-bottom: 8px;">
+        <div class="ppill" id="ppill-offroad" data-tooltip="Bloque : highway=track · highway=path · highway=bridleway">
+          <div class="ppill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+            </svg>
+          </div>
+          <div class="ppill-text">
+            <div class="ppill-name" data-i18n="routing.pavedOnly">Revêtu uniquement</div>
+            <div class="ppill-sub" data-i18n="routing.pavedOnlySub">Éviter pistes et chemins</div>
+          </div>
+          <div class="ppill-dot"></div>
+        </div>
       </div>
 
       <div class="routing-input-group">
@@ -232,7 +248,7 @@
       </div>
       
         <!-- Photo coverage – Panoramax accordion -->
-        <div id="pano-accordion" class="provider-accordion">
+        <div id="pano-accordion" class="provider-accordion open">
           <div class="provider-header" id="pano-accordion-header">
             <div class="provider-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -252,7 +268,7 @@
             <input type="checkbox" id="avoid-photo-coverage" style="display:none">
             <input type="checkbox" id="avoid-photo-coverage-360" style="display:none">
 
-            <div class="provider-pills">
+            <div class="provider-pills" style="margin-top: 8px;">
               <div class="ppill" id="ppill-all">
                 <div class="ppill-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -505,7 +521,7 @@
       }
     })();
   </script>
-  <script type="module" src="./main.js"></script>
+  <script type="module" src="./main.js?v=__APP_VERSION__"></script>
 </body>
 
 </html>

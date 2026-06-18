@@ -20,6 +20,8 @@
     "clear": "Clear",
     "mapillaryWeight": "Mapillary Weight:",
     "unpavedRoads": "Avoid unpaved roads",
+    "pavedOnly": "Paved only",
+    "pavedOnlySub": "Avoid tracks & paths",
     "avoidPushing": "Avoid pushing bike",
     "collapsePanel": "Collapse",
     "expandPanel": "Expand",
