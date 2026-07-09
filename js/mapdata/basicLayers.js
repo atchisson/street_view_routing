@@ -20,6 +20,16 @@ export function addBasicLayers(map) {
     });
   }
 
+  // Tracestrack Topo layer (only when the API key is configured, see sources.js)
+  if (map.getSource("topo") && !map.getLayer("topo-layer")) {
+    map.addLayer({
+      id: "topo-layer",
+      type: "raster",
+      source: "topo",
+      layout: { visibility: "none" }
+    });
+  }
+
   // Waymarked Trails overlays (transparent tiles rendered above the basemap)
   if (!map.getLayer("waymarked-hiking-layer")) {
     map.addLayer({

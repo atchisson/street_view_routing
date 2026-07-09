@@ -1,5 +1,7 @@
 // Map data sources configuration
 
+import { envConfig } from '../config/envConfig.js';
+
 export function addBasicSources(map) {
   // Raster: OSM Standard
   if (!map.getSource("osm")) {
@@ -22,6 +24,20 @@ export function addBasicSources(map) {
       ],
       tileSize: 256,
       attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    });
+  }
+
+  // Raster: Tracestrack Topo (requires API key from https://console.tracestrack.com)
+  const tracestrackKey = envConfig.TRACESTRACK_API_KEY;
+  if (tracestrackKey && !map.getSource("topo")) {
+    map.addSource("topo", {
+      type: "raster",
+      tiles: [
+        `https://tile.tracestrack.com/topo__/{z}/{x}/{y}.png?key=${tracestrackKey}`
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>, © <a href="https://www.tracestrack.com/" target="_blank">Tracestrack</a>'
     });
   }
 

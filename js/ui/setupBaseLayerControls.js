@@ -140,8 +140,9 @@ export function setupBaseLayerControls(map, isInitializingRef) {
       const selectedMap = btn.dataset.map;
       const isSatellite = selectedMap === "satellite";
       const isOsm = selectedMap === "osm";
+      const isTopo = selectedMap === "topo";
 
-      if (!isSatellite && !isOsm) {
+      if (!isSatellite && !isOsm && !isTopo) {
         console.warn('[UI] unsupported map style selected:', selectedMap);
         return;
       }
@@ -169,21 +170,14 @@ export function setupBaseLayerControls(map, isInitializingRef) {
         // set map theme to light by default when selecting raster sources
         switchMapTheme(map, false);
 
-        if (isSatellite) {
-          if (map.getLayer('satellite-layer')) {
-            map.setLayoutProperty('satellite-layer', 'visibility', 'visible');
+        const setLayerVisibility = (layerId, visible) => {
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
           }
-          if (map.getLayer('osm-layer')) {
-            map.setLayoutProperty('osm-layer', 'visibility', 'none');
-          }
-        } else {
-          if (map.getLayer('satellite-layer')) {
-            map.setLayoutProperty('satellite-layer', 'visibility', 'none');
-          }
-          if (map.getLayer('osm-layer')) {
-            map.setLayoutProperty('osm-layer', 'visibility', 'visible');
-          }
-        }
+        };
+        setLayerVisibility('satellite-layer', isSatellite);
+        setLayerVisibility('osm-layer', isOsm);
+        setLayerVisibility('topo-layer', isTopo);
 
         document.querySelectorAll('.basemap-thumb, .basemap-btn').forEach(t => t.classList.remove('selected'));
         btn.classList.add('selected');

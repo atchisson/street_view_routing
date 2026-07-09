@@ -106,6 +106,7 @@
     "dark": "Sombre",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
+    "topo": "Topographique (Tracestrack)",
     "terrain": "Relief",
     "hillshade": "Ombrage",
     "terrainTitle": "Données de relief Mapterhorn",

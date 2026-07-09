@@ -26,6 +26,9 @@ import { setupPermalink } from './js/utils/permalink.js';
 // 📦 Map Theme
 import { applyInitialMapTheme } from './js/ui/mapThemeInitializer.js';
 
+// 📦 Env config (Tracestrack API key, ...)
+import { envConfig } from './js/config/envConfig.js';
+
 // Set thumbnail background images (wait for DOM to be ready)
 function setupThumbnails() {
   const standardThumb = document.querySelector('[data-map="standard"]');
@@ -43,6 +46,13 @@ function setupThumbnails() {
   }
   if (satelliteThumb) {
     satelliteThumb.style.backgroundImage = "url('./thumbs/thumb-satellite.png')";
+  }
+  // Topo button is hidden unless a Tracestrack API key is configured.
+  // The thumbnail is a live tile (Alps) since tiles require the key.
+  const topoThumb = document.querySelector('[data-map="topo"]');
+  if (topoThumb && envConfig.TRACESTRACK_API_KEY) {
+    topoThumb.style.backgroundImage = `url('https://tile.tracestrack.com/topo__/11/1060/721.png?key=${envConfig.TRACESTRACK_API_KEY}')`;
+    topoThumb.style.display = 'block';
   }
 }
 

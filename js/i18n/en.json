@@ -106,6 +106,7 @@
     "dark": "Dark",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
+    "topo": "Topographic (Tracestrack)",
     "terrain": "Terrain",
     "hillshade": "Hillshade",
     "terrainTitle": "Mapterhorn terrain data",
