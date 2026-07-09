@@ -36,6 +36,9 @@
   "heightgraph": {
     "title": "Elevation Profile",
     "mapillaryCoverage": "Mapillary Coverage",
+    "photoCoverage": "Photo coverage",
+    "covered": "Covered",
+    "notCovered": "Not covered",
     "surface": "Surface",
     "none": "None",
     "roadClass": "Road Class",

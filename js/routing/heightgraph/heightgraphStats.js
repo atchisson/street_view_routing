@@ -2,7 +2,7 @@
 
 import { routeState } from '../routeState.js';
 import { calculateDistance } from './heightgraphUtils.js';
-import { getSurfaceColorForStats, getRoadClassColorForStats } from './heightgraphDrawing.js';
+import { getSurfaceColorForStats, getRoadClassColorForStats, getPhotoCoverageColorForStats } from './heightgraphDrawing.js';
 import { getColorForEncodedValue } from '../colorSchemes.js';
 import { t } from '../../i18n/i18n.js';
 
@@ -36,7 +36,7 @@ export function updateHeightgraphStats(encodedType, encodedValues) {
     const segmentDistance = calculateDistance(coordinates[i], coordinates[i + 1]);
     
     let key;
-    if (encodedType === 'mapillary_coverage') {
+    if (encodedType === 'mapillary_coverage' || encodedType === 'photo_coverage') {
       const isTrue = value === true || value === 'True' || value === 'true';
       key = isTrue ? 'true' : 'false';
     } else {
@@ -68,6 +68,9 @@ export function updateHeightgraphStats(encodedType, encodedValues) {
     if (encodedType === 'mapillary_coverage') {
       displayKey = key === 'true' ? t('heightgraph.tooltip.yes') : t('heightgraph.tooltip.no');
       backgroundColor = key === 'true' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)';
+    } else if (encodedType === 'photo_coverage') {
+      displayKey = key === 'true' ? t('heightgraph.covered') : t('heightgraph.notCovered');
+      backgroundColor = getPhotoCoverageColorForStats(key);
     } else if (encodedType === 'surface') {
       backgroundColor = getSurfaceColorForStats(key);
     } else if (encodedType === 'road_class') {
@@ -139,7 +142,7 @@ function highlightSegmentsByValue(map, encodedType, targetValue, data, coordinat
     
     // Normalize value for comparison
     let normalizedValue;
-    if (encodedType === 'mapillary_coverage') {
+    if (encodedType === 'mapillary_coverage' || encodedType === 'photo_coverage') {
       const isTrue = value === true || value === 'True' || value === 'true';
       normalizedValue = isTrue ? 'true' : 'false';
     } else {

@@ -56,6 +56,12 @@ export const CUSTOM_PRESENT_COLORS = {
   false: '#ec4899'   // Pink for false
 };
 
+// Panoramax photo coverage colors
+export const PHOTO_COVERAGE_COLORS = {
+  true: '#ef4444',   // Red: already covered
+  false: '#22c55e'   // Green: not covered yet
+};
+
 
 // Default colors
 export const DEFAULT_COLOR = '#9ca3af'; // Gray
@@ -119,6 +125,26 @@ export function getCustomPresentColor(value) {
 }
 
 /**
+ * Get photo coverage color (hex format)
+ * @param {boolean|string} value - Photo coverage value
+ * @returns {string} Hex color
+ */
+export function getPhotoCoverageColor(value) {
+  const isTrue = value === true || value === 'True' || value === 'true';
+  return isTrue ? PHOTO_COVERAGE_COLORS.true : PHOTO_COVERAGE_COLORS.false;
+}
+
+/**
+ * Get photo coverage color (rgba format)
+ * @param {boolean|string} value - Photo coverage value
+ * @param {number} opacity - Opacity (0.0 - 1.0)
+ * @returns {string} RGBA color
+ */
+export function getPhotoCoverageColorRgba(value, opacity = 0.3) {
+  return hexToRgba(getPhotoCoverageColor(value), opacity);
+}
+
+/**
  * Get bicycle infrastructure color (hex format)
  * @param {string|number} value - Bicycle infrastructure value
  * @returns {string} Hex color
@@ -142,6 +168,10 @@ export function getColorForEncodedValue(encodedType, value, allValues = []) {
   
   if (encodedType === 'road_class') {
     return getRoadClassColor(value);
+  }
+
+  if (encodedType === 'photo_coverage' || encodedType === 'photo_coverage_only360') {
+    return getPhotoCoverageColor(value);
   }
   
   if (encodedType === 'elevation' || encodedType === 'time' || encodedType === 'distance') {

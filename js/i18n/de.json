@@ -34,6 +34,9 @@
   "heightgraph": {
     "title": "Höhenprofil",
     "mapillaryCoverage": "Mapillary Coverage",
+    "photoCoverage": "Foto-Abdeckung",
+    "covered": "Abgedeckt",
+    "notCovered": "Nicht abgedeckt",
     "surface": "Surface",
     "none": "Keine",
     "roadClass": "Straßenklasse",

@@ -9,6 +9,7 @@ import { t } from '../../i18n/i18n.js';
 export function getLabelForEncodedType(type) {
   const labels = {
     'road_class': t('heightgraph.roadClass'),
+    'photo_coverage': t('heightgraph.photoCoverage'),
     'road_environment': t('heightgraph.roadEnvironment'),
     'road_access': t('heightgraph.roadAccess'),
     'time': t('heightgraph.time'),

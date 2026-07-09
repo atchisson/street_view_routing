@@ -6,7 +6,7 @@ import { updateRouteColor } from './routeVisualization.js';
 import { HEIGHTGRAPH_CONFIG } from './heightgraph/heightgraphConfig.js';
 import { getLabelForEncodedType, validateHeightgraphData, getContainerWidth, calculateCumulativeDistances } from './heightgraph/heightgraphUtils.js';
 import { setupCanvas, setupIndicatorCanvas } from './heightgraph/heightgraphCanvas.js';
-import { drawBackground, drawGrid, drawElevationLine, drawXAxisLabels, fillSegmentsByValue, getSurfaceColor, getRoadClassColor } from './heightgraph/heightgraphDrawing.js';
+import { drawBackground, drawGrid, drawElevationLine, drawXAxisLabels, fillSegmentsByValue, getSurfaceColor, getRoadClassColor, getPhotoCoverageColor } from './heightgraph/heightgraphDrawing.js';
 import { setupHeightgraphInteractivity, cleanupInteractivityHandlers } from './heightgraph/heightgraphInteractivity.js';
 import { updateHeightgraphStats } from './heightgraph/heightgraphStats.js';
 import { t } from '../i18n/i18n.js';
@@ -216,6 +216,8 @@ export function drawHeightgraph(elevations, totalDistance, encodedValues = {}, c
         fillSegmentsByValue(ctx, points, encodedValues.surface, getSurfaceColor, padding, graphHeight);
       } else if (currentSelectedType === 'road_class' && encodedValues.road_class && encodedValues.road_class.length > 0 && points.length > 0) {
         fillSegmentsByValue(ctx, points, encodedValues.road_class, getRoadClassColor, padding, graphHeight);
+      } else if (currentSelectedType === 'photo_coverage' && encodedValues.photo_coverage && encodedValues.photo_coverage.length > 0 && points.length > 0) {
+        fillSegmentsByValue(ctx, points, encodedValues.photo_coverage, getPhotoCoverageColor, padding, graphHeight);
       }
     }
   }

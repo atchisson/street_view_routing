@@ -36,6 +36,9 @@
   "heightgraph": {
     "title": "Profil altimétrique",
     "mapillaryCoverage": "Couverture Mapillary",
+    "photoCoverage": "Couverture photo",
+    "covered": "Couvert",
+    "notCovered": "Non couvert",
     "surface": "Revêtement",
     "none": "Aucun",
     "roadClass": "Type de voie",

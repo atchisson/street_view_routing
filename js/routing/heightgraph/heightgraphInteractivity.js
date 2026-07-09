@@ -247,6 +247,10 @@ export function setupHeightgraphInteractivity(canvas, elevations, totalDistance,
         const translatedKey = `heightgraph.roadClasses.${rawValue}`;
         const label = t(translatedKey) !== translatedKey ? t(translatedKey) : rawValue;
         tooltipContent += `${t('heightgraph.roadClass')}: ${label}`;
+      } else if (currentType === 'photo_coverage' && liveEncoded.photo_coverage?.[dataIndex] != null) {
+        const coverageValue = liveEncoded.photo_coverage[dataIndex];
+        const isCovered = coverageValue === true || coverageValue === 'True' || coverageValue === 'true';
+        tooltipContent += `${t('heightgraph.photoCoverage')}: ${isCovered ? t('heightgraph.covered') : t('heightgraph.notCovered')}`;
       }
 
       // Show tooltip

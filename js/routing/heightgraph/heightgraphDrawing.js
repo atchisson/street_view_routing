@@ -1,7 +1,7 @@
 // Drawing functions for heightgraph
 
 import { HEIGHTGRAPH_CONFIG } from './heightgraphConfig.js';
-import { getSurfaceColorRgba, getRoadClassColorRgba } from '../colorSchemes.js';
+import { getSurfaceColorRgba, getRoadClassColorRgba, getPhotoCoverageColorRgba } from '../colorSchemes.js';
 
 /**
  * Draw background rectangle
@@ -289,6 +289,14 @@ export function getSurfaceColor(surfaceValue) {
 
 export function getRoadClassColor(roadClassValue) {
   return getRoadClassColorRgba(roadClassValue, HEIGHTGRAPH_CONFIG.opacity.segments);
+}
+
+export function getPhotoCoverageColorForStats(coverageValue) {
+  return getPhotoCoverageColorRgba(coverageValue, HEIGHTGRAPH_CONFIG.opacity.stats);
+}
+
+export function getPhotoCoverageColor(coverageValue) {
+  return getPhotoCoverageColorRgba(coverageValue, HEIGHTGRAPH_CONFIG.opacity.segments);
 }
 
 

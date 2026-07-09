@@ -156,17 +156,25 @@ export function setupRouteHover(map) {
                  encodedValues.surface[dataIndex] !== null) {
         selectedValue = encodedValues.surface[dataIndex];
         valueLabel = t('heightgraph.surface');
-      } else if (selectedType === 'road_class' && encodedValues.road_class && 
-                 encodedValues.road_class[dataIndex] !== undefined && 
+      } else if (selectedType === 'road_class' && encodedValues.road_class &&
+                 encodedValues.road_class[dataIndex] !== undefined &&
                  encodedValues.road_class[dataIndex] !== null) {
         selectedValue = encodedValues.road_class[dataIndex];
         valueLabel = t('heightgraph.roadClass');
+      } else if (selectedType === 'photo_coverage' && encodedValues.photo_coverage &&
+                 encodedValues.photo_coverage[dataIndex] !== undefined &&
+                 encodedValues.photo_coverage[dataIndex] !== null) {
+        selectedValue = encodedValues.photo_coverage[dataIndex];
+        valueLabel = t('heightgraph.photoCoverage');
       }
-      
+
       // Show popup only if we have a value for the selected type
       if (selectedValue !== null) {
         let displayValue = '';
-        if (typeof selectedValue === 'boolean') {
+        if (selectedType === 'photo_coverage') {
+          const isTrue = selectedValue === true || selectedValue === 'True' || selectedValue === 'true';
+          displayValue = isTrue ? t('heightgraph.covered') : t('heightgraph.notCovered');
+        } else if (typeof selectedValue === 'boolean') {
           displayValue = selectedValue ? t('heightgraph.tooltip.yes') : t('heightgraph.tooltip.no');
         } else {
           displayValue = String(selectedValue);
