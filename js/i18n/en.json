@@ -108,7 +108,12 @@
     "terrainTitle": "Mapterhorn terrain data",
     "hillshadeTitle": "Mapterhorn hillshade data",
     "panoramaxCoverage": "Panoramax coverage",
-    "panoramaxCoverageTitle": "Show Panoramax street-level photo coverage"
+    "panoramaxCoverageTitle": "Show Panoramax street-level photo coverage",
+    "trails": "Waymarked trails",
+    "trailsHiking": "Hiking",
+    "trailsCycling": "Cycling",
+    "trailsHikingTitle": "Waymarked hiking routes (waymarkedtrails.org)",
+    "trailsCyclingTitle": "Waymarked cycling routes (waymarkedtrails.org)"
   },
   "contextMenu": {
     "setStart": "Set as start",

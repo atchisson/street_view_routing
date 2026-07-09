@@ -21,6 +21,10 @@ async function reinitializeMapLayers(map) {
   };
   setVis('panoramax-sequences-flat', routeState.avoidPhotoCoverage);
   setVis('panoramax-sequences-360', routeState.avoidPhotoCoverageOnly360);
+
+  // Restore Waymarked Trails overlay visibility from checkbox state after style reload
+  setVis('waymarked-hiking-layer', document.getElementById('toggleTrailsHiking')?.checked);
+  setVis('waymarked-cycling-layer', document.getElementById('toggleTrailsCycling')?.checked);
 }
 
 /**

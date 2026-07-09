@@ -20,6 +20,27 @@ export function addBasicLayers(map) {
     });
   }
 
+  // Waymarked Trails overlays (transparent tiles rendered above the basemap)
+  if (!map.getLayer("waymarked-hiking-layer")) {
+    map.addLayer({
+      id: "waymarked-hiking-layer",
+      type: "raster",
+      source: "waymarked-hiking",
+      layout: { visibility: "none" },
+      paint: { "raster-opacity": 0.9 }
+    });
+  }
+
+  if (!map.getLayer("waymarked-cycling-layer")) {
+    map.addLayer({
+      id: "waymarked-cycling-layer",
+      type: "raster",
+      source: "waymarked-cycling",
+      layout: { visibility: "none" },
+      paint: { "raster-opacity": 0.9 }
+    });
+  }
+
   // Hillshade layer
   if (map.getSource("hillshade") && !map.getLayer("hillshade-layer")) {
     map.addLayer({

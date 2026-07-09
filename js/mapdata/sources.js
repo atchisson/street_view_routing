@@ -47,6 +47,32 @@ export function addBasicSources(map) {
     });
   }
 
+  // Raster overlay: Waymarked Trails (hiking routes)
+  if (!map.getSource("waymarked-hiking")) {
+    map.addSource("waymarked-hiking", {
+      type: "raster",
+      tiles: [
+        "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png"
+      ],
+      tileSize: 256,
+      maxzoom: 18,
+      attribution: '© <a href="https://waymarkedtrails.org" target="_blank">Waymarked Trails</a> (CC-BY-SA)'
+    });
+  }
+
+  // Raster overlay: Waymarked Trails (cycling routes)
+  if (!map.getSource("waymarked-cycling")) {
+    map.addSource("waymarked-cycling", {
+      type: "raster",
+      tiles: [
+        "https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png"
+      ],
+      tileSize: 256,
+      maxzoom: 18,
+      attribution: '© <a href="https://waymarkedtrails.org" target="_blank">Waymarked Trails</a> (CC-BY-SA)'
+    });
+  }
+
   // Bike lanes source
   if (!map.getSource("bike-lanes")) {
     map.addSource("bike-lanes", {

@@ -187,6 +187,28 @@ export function setupToggleHandlers() {
   }
 
 
+  // Toggle logic for Waymarked Trails overlays (hiking / cycling)
+  const toggleTrailsHiking = document.getElementById('toggleTrailsHiking');
+  const toggleTrailsCycling = document.getElementById('toggleTrailsCycling');
+
+  if (toggleTrailsHiking) {
+    toggleTrailsHiking.addEventListener('change', (e) => {
+      if (window.map && window.map.getLayer('waymarked-hiking-layer')) {
+        const visibility = e.target.checked ? 'visible' : 'none';
+        window.map.setLayoutProperty('waymarked-hiking-layer', 'visibility', visibility);
+      }
+    });
+  }
+
+  if (toggleTrailsCycling) {
+    toggleTrailsCycling.addEventListener('change', (e) => {
+      if (window.map && window.map.getLayer('waymarked-cycling-layer')) {
+        const visibility = e.target.checked ? 'visible' : 'none';
+        window.map.setLayoutProperty('waymarked-cycling-layer', 'visibility', visibility);
+      }
+    });
+  }
+
   // Map Settings Menu Toggle
   const mapSettingsToggle = document.getElementById('map-settings-toggle');
   const mapSettingsPanel = document.getElementById('map-settings-panel');

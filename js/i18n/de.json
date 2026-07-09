@@ -106,7 +106,12 @@
     "terrainTitle": "Mapterhorn Terrain Daten",
     "hillshadeTitle": "Mapterhorn Hillshade Daten",
     "panoramaxCoverage": "Panoramax-Abdeckung",
-    "panoramaxCoverageTitle": "Panoramax Straßenfoto-Abdeckung anzeigen"
+    "panoramaxCoverageTitle": "Panoramax Straßenfoto-Abdeckung anzeigen",
+    "trails": "Markierte Wege",
+    "trailsHiking": "Wandern",
+    "trailsCycling": "Rad",
+    "trailsHikingTitle": "Markierte Wanderwege (waymarkedtrails.org)",
+    "trailsCyclingTitle": "Markierte Radwege (waymarkedtrails.org)"
   },
   "contextMenu": {
     "setStart": "Startpunkt setzen",

@@ -108,7 +108,12 @@
     "terrainTitle": "Données de relief Mapterhorn",
     "hillshadeTitle": "Données d'ombrage Mapterhorn",
     "panoramaxCoverage": "Couverture Panoramax",
-    "panoramaxCoverageTitle": "Afficher la couverture photo Panoramax"
+    "panoramaxCoverageTitle": "Afficher la couverture photo Panoramax",
+    "trails": "Itinéraires balisés",
+    "trailsHiking": "Randonnée",
+    "trailsCycling": "Vélo",
+    "trailsHikingTitle": "Itinéraires de randonnée balisés (waymarkedtrails.org)",
+    "trailsCyclingTitle": "Itinéraires cyclables balisés (waymarkedtrails.org)"
   },
   "contextMenu": {
     "setStart": "Définir comme départ",
