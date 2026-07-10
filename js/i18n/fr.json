@@ -117,7 +117,11 @@
     "trailsHiking": "Randonnée",
     "trailsCycling": "Vélo",
     "trailsHikingTitle": "Itinéraires de randonnée balisés (waymarkedtrails.org)",
-    "trailsCyclingTitle": "Itinéraires cyclables balisés (waymarkedtrails.org)"
+    "trailsCyclingTitle": "Itinéraires cyclables balisés (waymarkedtrails.org)",
+    "poi": "Points d'intérêt",
+    "bookBoxes": "Boîtes à livres",
+    "bookBoxesTitle": "Boîtes à livres sans photo (boites-a-livres.fr)",
+    "bookBoxPopupNote": "Boîte à livres sans photo"
   },
   "contextMenu": {
     "setStart": "Définir comme départ",

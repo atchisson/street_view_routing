@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Daily redeploy to refresh the boites-a-livres dataset (no commit needed:
+    # the data is regenerated at build time and shipped in the Pages artifact)
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -25,6 +29,15 @@ jobs:
 
       - name: Inject git SHA as APP_VERSION
         run: sed -i "s/__APP_VERSION__/${{ github.sha }}/g" index.html js/config/config.public.js
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate boites-a-livres dataset
+        # The GeoJSON is not committed: it only exists in the Pages artifact.
+        # A failed download fails the build rather than deploying a site without the file.
+        run: node tools/update-boites-a-livres.mjs
 
       - uses: actions/configure-pages@v5
 

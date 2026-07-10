@@ -49,6 +49,7 @@ export class Permalink {
       }
       // Sync panoramax layers after map is ready (needed when restored from URL)
       syncPanoramaxLayers();
+      this.applyDisplaySettingsFromURL();
       if (this.pendingRouteCalculation) {
         this.calculateRouteFromURL();
       }
@@ -104,6 +105,20 @@ export class Permalink {
       photoCoverageStrength: routeState.photoCoverageStrength,
       photoDateMin: routeState.photoDateMin,
       photoDateMax: routeState.photoDateMax,
+      displaySettings: this.getDisplaySettings(),
+    };
+  }
+
+  // Current basemap / view / overlay settings, read from the UI controls
+  getDisplaySettings() {
+    const checked = id => !!document.getElementById(id)?.checked;
+    return {
+      basemap: document.querySelector('.basemap-btn.selected')?.dataset.map || 'osm',
+      terrain: checked('toggleTerrain'),
+      hillshade: checked('toggleHillshade'),
+      trailsHiking: checked('toggleTrailsHiking'),
+      trailsCycling: checked('toggleTrailsCycling'),
+      bookboxes: checked('toggleBookBoxes'),
     };
   }
 
@@ -264,6 +279,36 @@ export class Permalink {
     });
   }
 
+  // Restore basemap / view / overlay settings parsed from the URL.
+  // Reuses the existing UI controls (checkbox change events, basemap button click)
+  // so all layer logic stays in one place.
+  applyDisplaySettingsFromURL() {
+    const settings = this.pendingDisplaySettings;
+    if (!settings) return;
+    this.pendingDisplaySettings = null;
+
+    const activateToggle = (id, on) => {
+      const el = document.getElementById(id);
+      if (el && on && !el.checked) {
+        el.checked = true;
+        el.dispatchEvent(new Event('change'));
+      }
+    };
+    activateToggle('toggleTerrain', settings.terrain);
+    activateToggle('toggleHillshade', settings.hillshade);
+    activateToggle('toggleTrailsHiking', settings.trailsHiking);
+    activateToggle('toggleTrailsCycling', settings.trailsCycling);
+    activateToggle('toggleBookBoxes', settings.bookboxes);
+
+    if (settings.basemap && settings.basemap !== 'osm') {
+      const btn = document.querySelector(`.basemap-btn[data-map="${CSS.escape(settings.basemap)}"]`);
+      // Skip hidden buttons (e.g. topo without an API key)
+      if (btn && getComputedStyle(btn).display !== 'none') {
+        btn.click();
+      }
+    }
+  }
+
   buildParamParts() {
     const paramParts = [];
 
@@ -312,6 +357,15 @@ export class Permalink {
     }
     if (routeState.photoDateMin) paramParts.push(`date_min=${routeState.photoDateMin}`);
     if (routeState.photoDateMax) paramParts.push(`date_max=${routeState.photoDateMax}`);
+
+    // Basemap / view / overlay settings (only non-defaults, to keep the URL short)
+    const display = this.getDisplaySettings();
+    if (display.basemap && display.basemap !== 'osm') paramParts.push(`basemap=${encodeURIComponent(display.basemap)}`);
+    if (display.terrain) paramParts.push('terrain=1');
+    if (display.hillshade) paramParts.push('hillshade=1');
+    if (display.trailsHiking) paramParts.push('trails_hiking=1');
+    if (display.trailsCycling) paramParts.push('trails_cycling=1');
+    if (display.bookboxes) paramParts.push('bookboxes=1');
 
     return paramParts;
   }
@@ -420,6 +474,17 @@ export class Permalink {
       const encodedSelect = document.getElementById('heightgraph-encoded-select');
       if (encodedSelect) encodedSelect.value = encodedParam;
     }
+
+    // Basemap / view / overlay settings (applied once the map is loaded,
+    // because the layers and toggle handlers must exist first)
+    this.pendingDisplaySettings = {
+      basemap: params.get('basemap'),
+      terrain: params.get('terrain') === '1',
+      hillshade: params.get('hillshade') === '1',
+      trailsHiking: params.get('trails_hiking') === '1',
+      trailsCycling: params.get('trails_cycling') === '1',
+      bookboxes: params.get('bookboxes') === '1',
+    };
 
     // Photo coverage settings
     const avoidCoverage      = params.get('avoid_coverage') === '1';

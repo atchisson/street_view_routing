@@ -115,7 +115,11 @@
     "trailsHiking": "Wandern",
     "trailsCycling": "Rad",
     "trailsHikingTitle": "Markierte Wanderwege (waymarkedtrails.org)",
-    "trailsCyclingTitle": "Markierte Radwege (waymarkedtrails.org)"
+    "trailsCyclingTitle": "Markierte Radwege (waymarkedtrails.org)",
+    "poi": "Interessante Orte",
+    "bookBoxes": "Bücherschränke",
+    "bookBoxesTitle": "Bücherschränke ohne Foto (boites-a-livres.fr)",
+    "bookBoxPopupNote": "Bücherschrank ohne Foto"
   },
   "contextMenu": {
     "setStart": "Startpunkt setzen",

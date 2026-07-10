@@ -209,6 +209,16 @@ export function setupToggleHandlers() {
     });
   }
 
+  // Toggle logic for book boxes without photo (boites-a-livres.fr)
+  const toggleBookBoxes = document.getElementById('toggleBookBoxes');
+  if (toggleBookBoxes) {
+    toggleBookBoxes.addEventListener('change', async (e) => {
+      if (!window.map) return;
+      const { setBoitesALivresVisibility } = await import('../mapdata/boitesALivres.js');
+      setBoitesALivresVisibility(window.map, e.target.checked);
+    });
+  }
+
   // Map Settings Menu Toggle
   const mapSettingsToggle = document.getElementById('map-settings-toggle');
   const mapSettingsPanel = document.getElementById('map-settings-panel');

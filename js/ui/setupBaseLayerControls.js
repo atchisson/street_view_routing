@@ -25,6 +25,12 @@ async function reinitializeMapLayers(map) {
   // Restore Waymarked Trails overlay visibility from checkbox state after style reload
   setVis('waymarked-hiking-layer', document.getElementById('toggleTrailsHiking')?.checked);
   setVis('waymarked-cycling-layer', document.getElementById('toggleTrailsCycling')?.checked);
+
+  // Restore book boxes overlay after style reload (source/layer are created lazily)
+  if (document.getElementById('toggleBookBoxes')?.checked) {
+    const { setBoitesALivresVisibility } = await import('../mapdata/boitesALivres.js');
+    setBoitesALivresVisibility(map, true);
+  }
 }
 
 /**
