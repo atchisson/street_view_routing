@@ -144,6 +144,7 @@
     "noRouteExport": "Keine Route zum Exportieren vorhanden",
     "noRouteData": "Keine Routendaten verfügbar",
     "checkGraphhopper": "Stelle sicher, dass GraphHopper läuft",
+    "routerDownBanner": "Der Routing-Server scheint nicht erreichbar zu sein. Die Routenberechnung funktioniert möglicherweise nicht — Karte und Ebenen bleiben verfügbar.",
     "coordsMissing": "Koordinaten fehlen",
     "coordsNotArray": "Koordinaten müssen ein Array mit mindestens 2 Werten sein",
     "coordsInvalidFormat": "Koordinaten müssen ein Array [lng, lat] oder Objekt {lng, lat} sein",

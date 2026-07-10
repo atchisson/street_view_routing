@@ -146,6 +146,7 @@
     "noRouteExport": "Aucun itinéraire à exporter",
     "noRouteData": "Aucune donnée d'itinéraire disponible",
     "checkGraphhopper": "Vérifiez que GraphHopper est en cours d'exécution",
+    "routerDownBanner": "Le serveur de routage semble indisponible. Le calcul d'itinéraire risque de ne pas fonctionner — la carte et les couches restent consultables.",
     "coordsMissing": "Coordonnées manquantes",
     "coordsNotArray": "Les coordonnées doivent être un tableau d'au moins 2 valeurs",
     "coordsInvalidFormat": "Les coordonnées doivent être un tableau [lng, lat] ou un objet {lng, lat}",

@@ -50,6 +50,7 @@ export class Permalink {
       // Sync panoramax layers after map is ready (needed when restored from URL)
       syncPanoramaxLayers();
       this.applyDisplaySettingsFromURL();
+      this.scheduleRouterDownCheck();
       if (this.pendingRouteCalculation) {
         this.calculateRouteFromURL();
       }
@@ -128,8 +129,10 @@ export class Permalink {
       const response = await fetch(infoUrl);
       if (!response.ok) {
         console.warn('[Permalink] Could not load router info, status', response.status);
+        this.routerInfoFailed = true;
         return null;
       }
+      this.routerInfoFailed = false;
       const data = await response.json();
       console.debug('[Permalink] /info response:', data);
 
@@ -184,8 +187,34 @@ export class Permalink {
       return this.normalizeBbox(bbox);
     } catch (err) {
       console.warn('[Permalink] failed to fetch router bbox:', err);
+      this.routerInfoFailed = true;
       return null;
     }
+  }
+
+  // If the router /info call failed at startup, retry once after a short delay
+  // (avoids false positives on flaky connections), then warn the user with a
+  // banner — otherwise the outage is only discovered when calculating a route.
+  scheduleRouterDownCheck() {
+    if (!this.routerInfoFailed) return;
+    setTimeout(async () => {
+      const bbox = await this.getRouterBBox();
+      if (!this.routerInfoFailed) {
+        // Router came back: apply the bbox that was missed at startup
+        if (!this.hasMapParam && bbox) {
+          try {
+            this.map.fitBounds(bbox, {
+              padding: { top: 70, bottom: 70, left: 70, right: 70 },
+              duration: 800
+            });
+          } catch { /* ignore */ }
+          this.drawRouterBBoxLayer(bbox);
+        }
+        return;
+      }
+      const { showRouterDownBanner } = await import('../ui/maintenanceBanner.js');
+      showRouterDownBanner();
+    }, 3000);
   }
 
   normalizeBbox(bbox) {
