@@ -217,7 +217,7 @@ export function isDefaultCustomModel(customModel, profile = 'car_customizable') 
  * @param {Object} customModel - Custom model configuration
  * @returns {Object} Request body for GraphHopper API
  */
-export function buildPostRequestBodyWithCustomModel(points, profile, customModel) {
+export function buildPostRequestBodyWithCustomModel(points, profile, customModel, options = {}) {
   const graphHopperProfile = getGraphHopperProfile(profile);
   const requestBody = {
     points: points,
@@ -227,11 +227,26 @@ export function buildPostRequestBodyWithCustomModel(points, profile, customModel
     details: ['photo_coverage', 'photo_coverage_only360', 'road_class'],
     custom_model: customModel
   };
-  
+
   // ch.disable is required for custom model routing on all profiles
   requestBody['ch.disable'] = true;
-  
+
+  // Avoid repeated roads (custom fork): penalize edges already traversed by previous legs
+  if (options.avoidTraversedEdges) {
+    requestBody['avoid_traversed_edges'] = true;
+    requestBody['traversed_edge_factor'] = options.traversedEdgeFactor ?? 0.1;
+  }
+
   return requestBody;
+}
+
+/**
+ * Map the 0-100 repeated-roads strength slider to a traversed_edge_factor in (0, 1].
+ * 0.5 at s=0, ~0.07 at s=50, 0.01 at s=100 (same exponential scale as photo coverage).
+ */
+export function traversedStrengthToFactor(strength) {
+  const t = Math.max(0, Math.min(100, strength ?? 50)) / 100;
+  return 0.5 * Math.pow(0.02, t);
 }
 
 // ============================================================================

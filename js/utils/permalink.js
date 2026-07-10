@@ -7,6 +7,7 @@ import {
   applyPhotoCoverageSettings,
   syncPanoramaxLayers,
   updateStrengthRowVisibility,
+  updateNoRepeatUI,
 } from '../routing/routingUI.js';
 import { updateWaypointsList } from '../routing/waypoints/waypointList.js';
 import { updateCoordinateTooltips } from '../routing/coordinates/coordinateTooltips.js';
@@ -106,6 +107,8 @@ export class Permalink {
       photoCoverageStrength: routeState.photoCoverageStrength,
       photoDateMin: routeState.photoDateMin,
       photoDateMax: routeState.photoDateMax,
+      avoidRepeatedRoads: routeState.avoidRepeatedRoads,
+      repeatedRoadsStrength: routeState.repeatedRoadsStrength,
       displaySettings: this.getDisplaySettings(),
     };
   }
@@ -387,6 +390,12 @@ export class Permalink {
     if (routeState.photoDateMin) paramParts.push(`date_min=${routeState.photoDateMin}`);
     if (routeState.photoDateMax) paramParts.push(`date_max=${routeState.photoDateMax}`);
 
+    // Avoid repeated roads
+    if (routeState.avoidRepeatedRoads) {
+      paramParts.push('no_repeat=1');
+      paramParts.push(`no_repeat_strength=${routeState.repeatedRoadsStrength ?? 50}`);
+    }
+
     // Basemap / view / overlay settings (only non-defaults, to keep the URL short)
     const display = this.getDisplaySettings();
     if (display.basemap && display.basemap !== 'osm') paramParts.push(`basemap=${encodeURIComponent(display.basemap)}`);
@@ -529,6 +538,14 @@ export class Permalink {
     }
     if (dateMinParam) routeState.photoDateMin = dateMinParam;
     if (dateMaxParam) routeState.photoDateMax = dateMaxParam;
+
+    // Avoid repeated roads settings
+    routeState.avoidRepeatedRoads = params.get('no_repeat') === '1';
+    const noRepeatStrengthParam = params.get('no_repeat_strength');
+    if (noRepeatStrengthParam !== null) {
+      routeState.repeatedRoadsStrength = parseFloat(noRepeatStrengthParam);
+    }
+    updateNoRepeatUI();
 
     const coverageSwitch  = document.getElementById('avoid-photo-coverage');
     if (coverageSwitch)  coverageSwitch.checked = avoidCoverage;

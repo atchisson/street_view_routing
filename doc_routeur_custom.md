@@ -177,6 +177,35 @@ POST /route
 
 ---
 
+## Mode « couverture maximale » — ne pas repasser deux fois
+
+Deux paramètres optionnels du POST `/route` pénalisent les edges déjà empruntés par les
+tronçons précédents du trajet (waypoints intermédiaires), dans **les deux sens**. Au lieu
+d'un aller-retour vers un waypoint, la route revient par une boucle.
+
+| Champ | Type | Défaut | Description |
+|---|---|---|---|
+| `avoid_traversed_edges` | `boolean` | `false` | Active le mode. Nécessite `ch.disable: true`. |
+| `traversed_edge_factor` | `number` | `0.1` | Facteur de priorité dans `(0, 1]`. `1.0` = neutre, proche de `0` = quasi-interdit. Le poids d'un edge déjà emprunté est multiplié par `1/facteur`. |
+
+```json
+{
+  "points": [[1.9, 47.9], [1.95, 47.88], [2.0, 47.85]],
+  "profile": "bike",
+  "ch.disable": true,
+  "avoid_traversed_edges": true,
+  "traversed_edge_factor": 0.1
+}
+```
+
+- Sans waypoint intermédiaire (2 points), le mode est sans effet : un plus court chemin
+  ne repasse jamais deux fois sur le même edge à l'intérieur d'un tronçon.
+- La pénalité est **souple** : une impasse menant à un waypoint reste franchissable,
+  le routeur ne réutilise un edge qu'en dernier recours.
+- Incompatible avec `algorithm=alternative_route` et avec le mode CH (speed mode).
+
+---
+
 ## Notes importantes
 
 - **`ch.disable: true` est obligatoire** dès qu'un `custom_model` est présent. Sans ça, l'API retourne une erreur.

@@ -31,7 +31,10 @@
       "start": "Point de départ",
       "end": "Point d'arrivée",
       "waypoint": "Point de passage"
-    }
+    },
+    "noRepeat": "Ne pas repasser deux fois",
+    "noRepeatSub": "Boucle plutôt que demi-tour",
+    "noRepeatStrength": "Intensité"
   },
   "heightgraph": {
     "title": "Profil altimétrique",

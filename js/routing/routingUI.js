@@ -146,6 +146,18 @@ function showDataDateToast(dataDate) {
   }, 6000);
 }
 
+export function updateNoRepeatUI() {
+  const pill = document.getElementById('ppill-norepeat');
+  if (pill) pill.classList.toggle('active', !!routeState.avoidRepeatedRoads);
+  const options = document.getElementById('norepeat-options');
+  if (options) options.style.display = routeState.avoidRepeatedRoads ? '' : 'none';
+  const slider = document.getElementById('repeated-roads-strength');
+  if (slider) {
+    slider.value = routeState.repeatedRoadsStrength ?? 50;
+    updateOptSliderBg(slider);
+  }
+}
+
 export function updateStrengthRowVisibility() {
   const anyChecked = routeState.avoidPhotoCoverage || routeState.avoidPhotoCoverageOnly360;
 
@@ -425,6 +437,33 @@ export function setupUIHandlers(map) {
       if (!routeState.customModel) routeState.customModel = ensureCustomModel(null, routeState.selectedProfile);
       applyUnpavedRoadsSettings();
       recalculateRouteIfReady();
+    });
+  }
+
+  // Avoid repeated roads pill (avoid_traversed_edges fork parameter)
+  const ppillNoRepeat = document.getElementById('ppill-norepeat');
+  if (ppillNoRepeat) {
+    ppillNoRepeat.addEventListener('click', () => {
+      routeState.avoidRepeatedRoads = !routeState.avoidRepeatedRoads;
+      trackEvent('Route', routeState.avoidRepeatedRoads ? 'AvoidRepeatedRoads' : 'AllowRepeatedRoads');
+      updateNoRepeatUI();
+      recalculateRouteIfReady();
+    });
+  }
+
+  const repeatedRoadsSlider = document.getElementById('repeated-roads-strength');
+  if (repeatedRoadsSlider) {
+    repeatedRoadsSlider.value = routeState.repeatedRoadsStrength ?? 50;
+    updateOptSliderBg(repeatedRoadsSlider);
+    // Debounce the router request so dragging the slider doesn't fire one per tick.
+    let repeatedRoadsDebounceTimer = null;
+    repeatedRoadsSlider.addEventListener('input', (e) => {
+      routeState.repeatedRoadsStrength = parseFloat(e.target.value);
+      updateOptSliderBg(e.target); // immediate visual feedback
+      clearTimeout(repeatedRoadsDebounceTimer);
+      repeatedRoadsDebounceTimer = setTimeout(() => {
+        if (routeState.avoidRepeatedRoads) recalculateRouteIfReady();
+      }, 350);
     });
   }
 

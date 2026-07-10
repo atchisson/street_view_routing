@@ -10,6 +10,7 @@ import {
   getGraphHopperProfile,
   ensureCustomModel,
   buildPostRequestBodyWithCustomModel,
+  traversedStrengthToFactor,
   getMapillaryPriority,
   updateMapillaryPriority,
   updateUnpavedRoadsRule,
@@ -77,7 +78,11 @@ async function calculateComparisonWithWeightOne(map, allPoints, currentPath, cur
     const requestBody = buildPostRequestBodyWithCustomModel(
       allPoints,
       routeState.selectedProfile,
-      comparisonCustomModel
+      comparisonCustomModel,
+      {
+        avoidTraversedEdges: routeState.avoidRepeatedRoads,
+        traversedEdgeFactor: traversedStrengthToFactor(routeState.repeatedRoadsStrength)
+      }
     );
     
     // Fetch comparison route
@@ -695,7 +700,11 @@ export async function calculateRoute(map, start, end, waypoints = []) {
       const requestBody = buildPostRequestBodyWithCustomModel(
         allPoints,
         routeState.selectedProfile,
-        routeState.customModel
+        routeState.customModel,
+        {
+          avoidTraversedEdges: routeState.avoidRepeatedRoads,
+          traversedEdgeFactor: traversedStrengthToFactor(routeState.repeatedRoadsStrength)
+        }
       );
       
       try {

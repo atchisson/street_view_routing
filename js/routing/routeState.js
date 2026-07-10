@@ -49,6 +49,11 @@ export const routeState = {
   avoidPhotoCoverageOnly360: false,
   photoCoverageStrength: 50, // 0 (weak) to 100 (strong), continuous exponential scale
 
+  // Avoid repeated roads: penalize edges already used by previous route legs
+  // (custom GraphHopper fork, avoid_traversed_edges). Loops back instead of U-turns at waypoints.
+  avoidRepeatedRoads: false,
+  repeatedRoadsStrength: 50, // 0 (weak) to 100 (strong), same exponential scale as photoCoverageStrength
+
   // Date range filter for Panoramax coverage (YYYY-MM-DD strings or null = no filter)
   photoDateMin: null,
   photoDateMax: null,

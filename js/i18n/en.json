@@ -31,7 +31,10 @@
       "start": "Start point",
       "end": "End point",
       "waypoint": "Waypoint"
-    }
+    },
+    "noRepeat": "Don't pass twice",
+    "noRepeatSub": "Loop instead of U-turn",
+    "noRepeatStrength": "Strength"
   },
   "heightgraph": {
     "title": "Elevation Profile",

@@ -134,6 +134,33 @@
         </div>
       </div>
 
+      <!-- Avoid repeated roads toggle (max photo coverage) -->
+      <div class="provider-pills" style="margin-bottom: 8px;">
+        <div class="ppill" id="ppill-norepeat" data-tooltip="Agit avec au moins un point de passage intermédiaire">
+          <div class="ppill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 2l4 4-4 4"/>
+              <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+              <path d="M7 22l-4-4 4-4"/>
+              <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </div>
+          <div class="ppill-text">
+            <div class="ppill-name" data-i18n="routing.noRepeat">Ne pas repasser deux fois</div>
+            <div class="ppill-sub" data-i18n="routing.noRepeatSub">Boucle plutôt que demi-tour</div>
+          </div>
+          <div class="ppill-dot"></div>
+        </div>
+      </div>
+      <div id="norepeat-options" style="display:none; margin-bottom: 8px;">
+        <div class="opt-section-title" data-i18n="routing.noRepeatStrength">Intensité</div>
+        <div class="opt-strength-row">
+          <span class="opt-strength-ends" data-i18n="photoCoverage.weak">Faible</span>
+          <input type="range" id="repeated-roads-strength" min="0" max="100" value="50" class="opt-slider">
+          <span class="opt-strength-ends" data-i18n="photoCoverage.strong">Fort</span>
+        </div>
+      </div>
+
       <div class="routing-input-group">
         <div class="input-with-icon">
           <div class="input-icon input-icon-start">

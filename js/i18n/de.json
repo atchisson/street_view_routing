@@ -29,7 +29,10 @@
       "start": "Startpunkt",
       "end": "Endpunkt",
       "waypoint": "Zwischenpunkt"
-    }
+    },
+    "noRepeat": "Nicht zweimal befahren",
+    "noRepeatSub": "Schleife statt Wendemanöver",
+    "noRepeatStrength": "Intensität"
   },
   "heightgraph": {
     "title": "Höhenprofil",
