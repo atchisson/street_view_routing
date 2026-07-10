@@ -15,7 +15,7 @@ export function ensureBoitesALivresLayer(map) {
     map.addSource(SOURCE_ID, {
       type: 'geojson',
       data: './data/boites-a-livres-sans-photo.geojson',
-      attribution: '© <a href="https://www.boites-a-livres.fr" target="_blank">boites-a-livres.fr</a> (ODbL)'
+      attribution: '© <a href="https://www.boites-a-livres.fr" target="_blank">boites-a-livres.fr</a>'
     });
   }
 
