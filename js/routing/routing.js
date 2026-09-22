@@ -10,11 +10,12 @@ import {
   getGraphHopperProfile,
   ensureCustomModel,
   buildPostRequestBodyWithCustomModel,
-  traversedStrengthToFactor,
   getMapillaryPriority,
   updateMapillaryPriority,
   updateUnpavedRoadsRule,
-  updateAvoidPushingRule
+  updateTollRule,
+  updateAvoidPushingRule,
+  traversedStrengthToFactor
 } from './customModel.js';
 import { calculateDistance } from './heightgraph/heightgraphUtils.js';
 import { optimizeWaypoints } from './waypointOptimizer.js';
@@ -79,10 +80,7 @@ async function calculateComparisonWithWeightOne(map, allPoints, currentPath, cur
       allPoints,
       routeState.selectedProfile,
       comparisonCustomModel,
-      {
-        avoidTraversedEdges: routeState.avoidRepeatedRoads,
-        traversedEdgeFactor: traversedStrengthToFactor(routeState.repeatedRoadsStrength)
-      }
+      buildRoutingOptions()
     );
     
     // Fetch comparison route
@@ -343,9 +341,27 @@ function computeUncoveredDistance(coordinates, photoCoverageDetails) {
 
 // Build GET request URL for route calculation (standard profiles: car, bike, foot)
 // Only requests road_class details to avoid HTTP 400 from unavailable properties
-function buildGetRequestUrl(points, profileParam) {
+function buildGetRequestUrl(points, profileParam, options = {}) {
   const pointParams = points.map(p => `point=${p[1]},${p[0]}`).join('&');
-  return `${GRAPHHOPPER_URL}/route?${pointParams}&profile=${profileParam}&points_encoded=false&elevation=true&ch.disable=true&details=road_class,photo_coverage&type=json`;
+  let url = `${GRAPHHOPPER_URL}/route?${pointParams}&profile=${profileParam}&points_encoded=false&elevation=true&ch.disable=true&details=road_class,photo_coverage&type=json`;
+
+  // The fork parameters have to travel on this path too: without them the
+  // option would be silently ignored whenever routing falls back to GET.
+  if (options.avoidTraversedEdges) {
+    const factor = traversedStrengthToFactor(options.traversedEdgeStrength ?? 50);
+    url += `&avoid_traversed_edges=true&traversed_edge_factor=${factor}`;
+  }
+
+  return url;
+}
+
+// Extra fork routing options, shared by the POST and GET paths so the two can
+// never drift apart.
+function buildRoutingOptions() {
+  return {
+    avoidTraversedEdges: routeState.avoidTraversedEdges,
+    traversedEdgeStrength: routeState.traversedEdgeStrength
+  };
 }
 
 // Fetch route with GET request (with fallback without details if needed)
@@ -674,11 +690,21 @@ export async function calculateRoute(map, start, end, waypoints = []) {
     if (supportsCustomModel(routeState.selectedProfile)) {
       routeState.customModel = ensureCustomModel(routeState.customModel, routeState.selectedProfile);
       
-      // Update unpaved roads rule for car_customizable profile
-      if (routeState.selectedProfile === 'car_customizable' && routeState.customModel) {
+      // Update unpaved roads rule — every profile, the toggle alone decides.
+      // routeState.avoidUnpavedRoads reads the value of the selected profile.
+      if (routeState.customModel) {
         routeState.customModel = updateUnpavedRoadsRule(
           routeState.customModel,
           routeState.avoidUnpavedRoads
+        );
+      }
+
+      // Toll rule — skipped entirely when the graph has no 'toll' encoded value,
+      // otherwise the router rejects the whole custom model.
+      if (routeState.customModel && routeState.tollSupported) {
+        routeState.customModel = updateTollRule(
+          routeState.customModel,
+          routeState.avoidToll
         );
       }
       
@@ -701,10 +727,7 @@ export async function calculateRoute(map, start, end, waypoints = []) {
         allPoints,
         routeState.selectedProfile,
         routeState.customModel,
-        {
-          avoidTraversedEdges: routeState.avoidRepeatedRoads,
-          traversedEdgeFactor: traversedStrengthToFactor(routeState.repeatedRoadsStrength)
-        }
+        buildRoutingOptions()
       );
       
       try {
@@ -718,7 +741,7 @@ export async function calculateRoute(map, start, end, waypoints = []) {
       }
     } else {
       // GET request with URL parameters
-      const url = buildGetRequestUrl(allPoints, profileParam);
+      const url = buildGetRequestUrl(allPoints, profileParam, buildRoutingOptions());
       response = await fetchRouteGet(url);
     }
     

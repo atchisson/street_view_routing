@@ -33,10 +33,23 @@ export const routeState = {
   // Custom model for car_customizable and bike_customizable profiles
   customModel: null,
   
-  // Unpaved roads setting (for car_customizable profile only)
-  // false = slightly reduce unpaved roads (0.7-0.8), true = strongly avoid them (0.2-0.3)
-  // Default: false (slightly reduce unpaved roads)
-  avoidUnpavedRoads: false,
+  // Unpaved roads setting — applies to every profile, but the default differs.
+  // The car model already bars footways and paths, so blocking tracks costs it
+  // nothing; on bike and foot, TRACK and PATH carry most of the usable network,
+  // so the block stays opt-in there.
+  // Always read and written through the accessor below, which targets the
+  // currently selected profile.
+  avoidUnpavedRoadsByProfile: {
+    car_customizable: true,
+    bike_customizable: false,
+    foot: false
+  },
+  get avoidUnpavedRoads() {
+    return this.avoidUnpavedRoadsByProfile[this.selectedProfile] === true;
+  },
+  set avoidUnpavedRoads(value) {
+    this.avoidUnpavedRoadsByProfile[this.selectedProfile] = !!value;
+  },
   
   // Avoid pushing setting (for bike_customizable profile only)
   // false = no additional penalty, true = strongly avoid routes that require pushing (< 6 km/h)
@@ -49,10 +62,17 @@ export const routeState = {
   avoidPhotoCoverageOnly360: false,
   photoCoverageStrength: 50, // 0 (weak) to 100 (strong), continuous exponential scale
 
-  // Avoid repeated roads: penalize edges already used by previous route legs
-  // (custom GraphHopper fork, avoid_traversed_edges). Loops back instead of U-turns at waypoints.
-  avoidRepeatedRoads: false,
-  repeatedRoadsStrength: 50, // 0 (weak) to 100 (strong), same exponential scale as photoCoverageStrength
+  // Avoid roads already used by earlier legs of the route (custom GraphHopper
+  // fork: avoid_traversed_edges). Only bites from three points up — with a
+  // single leg there is nothing already travelled to avoid.
+  avoidTraversedEdges: false,
+  traversedEdgeStrength: 50, // 0 (weak) to 100 (strong), logarithmic scale
+
+  // Toll avoidance. Needs the 'toll' encoded value in the router graph, which is
+  // baked in at import time — tollSupported is filled from /info at startup and
+  // gates the pill, so sending a model the graph cannot compile is impossible.
+  avoidToll: false,
+  tollSupported: false,
 
   // Date range filter for Panoramax coverage (YYYY-MM-DD strings or null = no filter)
   photoDateMin: null,

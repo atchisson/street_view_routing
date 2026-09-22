@@ -20,6 +20,16 @@
     "clear": "Löschen",
     "mapillaryWeight": "Mapillary Weight:",
     "unpavedRoads": "Unbefestigte Wege meiden",
+    "pavedOnly": "Nur befestigt",
+    "pavedOnlySub": "Wege und Pfade meiden",
+    "trajectoryOptions": "Streckenoptionen",
+    "dedupe": "Deduplizierung",
+    "dedupeSub": "Dieselbe Stelle nicht zweimal befahren",
+    "noToll": "Ohne Maut",
+    "noTollSub": "Mautstraßen meiden",
+    "avoidStrength": "Stärke der Vermeidung",
+    "weak": "Schwach",
+    "strong": "Stark",
     "avoidPushing": "Schieben verhindern",
     "collapsePanel": "Einklappen",
     "expandPanel": "Ausklappen",
@@ -29,10 +39,7 @@
       "start": "Startpunkt",
       "end": "Endpunkt",
       "waypoint": "Zwischenpunkt"
-    },
-    "noRepeat": "Nicht zweimal befahren",
-    "noRepeatSub": "Schleife statt Wendemanöver",
-    "noRepeatStrength": "Intensität"
+    }
   },
   "heightgraph": {
     "title": "Höhenprofil",

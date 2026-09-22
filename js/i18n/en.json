@@ -22,6 +22,14 @@
     "unpavedRoads": "Avoid unpaved roads",
     "pavedOnly": "Paved only",
     "pavedOnlySub": "Avoid tracks & paths",
+    "trajectoryOptions": "Route options",
+    "dedupe": "Deduplication",
+    "dedupeSub": "Avoid passing the same spot twice",
+    "noToll": "Toll-free",
+    "noTollSub": "Avoid toll roads",
+    "avoidStrength": "Avoidance strength",
+    "weak": "Weak",
+    "strong": "Strong",
     "avoidPushing": "Avoid pushing bike",
     "collapsePanel": "Collapse",
     "expandPanel": "Expand",
@@ -31,10 +39,7 @@
       "start": "Start point",
       "end": "End point",
       "waypoint": "Waypoint"
-    },
-    "noRepeat": "Don't pass twice",
-    "noRepeatSub": "Loop instead of U-turn",
-    "noRepeatStrength": "Strength"
+    }
   },
   "heightgraph": {
     "title": "Elevation Profile",

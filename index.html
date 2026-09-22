@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>missing_mapillary_gh-routing</title>
+  <title>street view routing</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <!-- <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' /> -->
@@ -116,49 +116,6 @@
           </svg>
           <span data-i18n="profiles.foot">Walking</span>
         </button>
-      </div>
-
-      <!-- Off-road toggle -->
-      <div class="provider-pills" style="margin-bottom: 8px;">
-        <div class="ppill" id="ppill-offroad" data-tooltip="Bloque : highway=track · highway=path · highway=bridleway">
-          <div class="ppill-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
-            </svg>
-          </div>
-          <div class="ppill-text">
-            <div class="ppill-name" data-i18n="routing.pavedOnly">Revêtu uniquement</div>
-            <div class="ppill-sub" data-i18n="routing.pavedOnlySub">Éviter pistes et chemins</div>
-          </div>
-          <div class="ppill-dot"></div>
-        </div>
-      </div>
-
-      <!-- Avoid repeated roads toggle (max photo coverage) -->
-      <div class="provider-pills" style="margin-bottom: 8px;">
-        <div class="ppill" id="ppill-norepeat" data-tooltip="Agit avec au moins un point de passage intermédiaire">
-          <div class="ppill-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 2l4 4-4 4"/>
-              <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
-              <path d="M7 22l-4-4 4-4"/>
-              <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
-            </svg>
-          </div>
-          <div class="ppill-text">
-            <div class="ppill-name" data-i18n="routing.noRepeat">Ne pas repasser deux fois</div>
-            <div class="ppill-sub" data-i18n="routing.noRepeatSub">Boucle plutôt que demi-tour</div>
-          </div>
-          <div class="ppill-dot"></div>
-        </div>
-      </div>
-      <div id="norepeat-options" style="display:none; margin-bottom: 8px;">
-        <div class="opt-section-title" data-i18n="routing.noRepeatStrength">Intensité</div>
-        <div class="opt-strength-row">
-          <span class="opt-strength-ends" data-i18n="photoCoverage.weak">Faible</span>
-          <input type="range" id="repeated-roads-strength" min="0" max="100" value="50" class="opt-slider">
-          <span class="opt-strength-ends" data-i18n="photoCoverage.strong">Fort</span>
-        </div>
       </div>
 
       <div class="routing-input-group">
@@ -346,6 +303,96 @@
                   <span class="opt-strength-ends" data-i18n="photoCoverage.weak">Faible</span>
                   <input type="range" id="photo-coverage-strength" min="0" max="100" value="50" class="opt-slider">
                   <span class="opt-strength-ends" data-i18n="photoCoverage.strong">Fort</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trajectory options accordion (paved-only + avoid already travelled roads) -->
+        <div id="trajectory-accordion" class="provider-accordion">
+          <div class="provider-header" id="trajectory-accordion-header">
+            <div class="provider-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="8" x2="21" y2="8"/>
+                <circle cx="15" cy="8" r="2.5"/>
+                <line x1="3" y1="16" x2="21" y2="16"/>
+                <circle cx="9" cy="16" r="2.5"/>
+              </svg>
+            </div>
+            <span class="provider-name" data-i18n="routing.trajectoryOptions">Options de trajet</span>
+            <!-- Counts the active options, so the state stays readable while collapsed -->
+            <span class="provider-badge" id="trajectory-badge">0</span>
+            <svg class="provider-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+
+          <div class="provider-body">
+            <div class="provider-pills" style="margin-top: 8px;">
+              <div class="ppill" id="ppill-offroad" data-tooltip="Bloque : highway=track · highway=path · highway=bridleway">
+                <div class="ppill-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+                  </svg>
+                </div>
+                <div class="ppill-text">
+                  <div class="ppill-name" data-i18n="routing.pavedOnly">Revêtu uniquement</div>
+                  <div class="ppill-sub" data-i18n="routing.pavedOnlySub">Éviter pistes et chemins</div>
+                </div>
+                <div class="ppill-dot"></div>
+              </div>
+
+              <div class="ppill" id="ppill-traversed" data-tooltip="Pénalise les routes déjà empruntées
+par les tronçons précédents.
+
+Sans effet à moins de 3 points, ni sur
+les chaussées séparées : 2×2 voies et
+paires de sens uniques sont deux routes
+distinctes pour le routeur.">
+                <div class="ppill-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 20v-8a4 4 0 0 1 8 0v4"/>
+                    <path d="M13 13l3 3 3-3"/>
+                    <path d="M3 3l18 18"/>
+                  </svg>
+                </div>
+                <div class="ppill-text">
+                  <div class="ppill-name" data-i18n="routing.dedupe">Déduplication</div>
+                  <div class="ppill-sub" data-i18n="routing.dedupeSub">Éviter de repasser 2x au même endroit</div>
+                </div>
+                <div class="ppill-dot"></div>
+              </div>
+
+              <!-- Revealed only when /info reports the 'toll' encoded value.
+                   Without it in the graph the custom model would be rejected. -->
+              <div class="ppill" id="ppill-toll" style="display: none;" data-tooltip="Bloque les routes taguées toll=yes.
+
+Nécessite l'encoded value 'toll' dans
+le graphe du routeur.">
+                <div class="ppill-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 21V9"/>
+                    <path d="M3 21h6"/>
+                    <path d="M6 11.5 20 7"/>
+                    <path d="M6 15.5 20 11"/>
+                  </svg>
+                </div>
+                <div class="ppill-text">
+                  <div class="ppill-name" data-i18n="routing.noToll">Sans péage</div>
+                  <div class="ppill-sub" data-i18n="routing.noTollSub">Éviter les routes à péage</div>
+                </div>
+                <div class="ppill-dot"></div>
+              </div>
+            </div>
+
+            <div class="provider-options" id="trajectory-options">
+              <div>
+                <div class="opt-section-title" data-i18n="routing.avoidStrength">Force de l'évitement</div>
+                <div class="opt-strength-row">
+                  <span class="opt-strength-ends" data-i18n="routing.weak">Faible</span>
+                  <input type="range" id="traversed-strength" min="0" max="100" value="50" class="opt-slider">
+                  <span class="opt-strength-ends" data-i18n="routing.strong">Fort</span>
                 </div>
               </div>
             </div>

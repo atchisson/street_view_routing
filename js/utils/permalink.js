@@ -7,7 +7,7 @@ import {
   applyPhotoCoverageSettings,
   syncPanoramaxLayers,
   updateStrengthRowVisibility,
-  updateNoRepeatUI,
+  updateTrajectoryOptionsUI,
 } from '../routing/routingUI.js';
 import { updateWaypointsList } from '../routing/waypoints/waypointList.js';
 import { updateCoordinateTooltips } from '../routing/coordinates/coordinateTooltips.js';
@@ -107,8 +107,6 @@ export class Permalink {
       photoCoverageStrength: routeState.photoCoverageStrength,
       photoDateMin: routeState.photoDateMin,
       photoDateMax: routeState.photoDateMax,
-      avoidRepeatedRoads: routeState.avoidRepeatedRoads,
-      repeatedRoadsStrength: routeState.repeatedRoadsStrength,
       displaySettings: this.getDisplaySettings(),
     };
   }
@@ -138,6 +136,12 @@ export class Permalink {
       this.routerInfoFailed = false;
       const data = await response.json();
       console.debug('[Permalink] /info response:', data);
+
+      // ── Router capabilities ────────────────────────────────────────────────
+      // 'toll' is baked into the graph at import time. Without it the router
+      // refuses the whole custom model, so the pill stays hidden.
+      routeState.tollSupported = !!(data.encoded_values && 'toll' in data.encoded_values);
+      updateTrajectoryOptionsUI();
 
       // ── Coverage date ceiling ──────────────────────────────────────────────
       // Done before bbox check so it always runs even if bbox is missing.
@@ -390,11 +394,16 @@ export class Permalink {
     if (routeState.photoDateMin) paramParts.push(`date_min=${routeState.photoDateMin}`);
     if (routeState.photoDateMax) paramParts.push(`date_max=${routeState.photoDateMax}`);
 
-    // Avoid repeated roads
-    if (routeState.avoidRepeatedRoads) {
-      paramParts.push('no_repeat=1');
-      paramParts.push(`no_repeat_strength=${routeState.repeatedRoadsStrength ?? 50}`);
+    // Trajectory options. paved_only is written even when it matches the default,
+    // unlike everything else here: its default depends on the profile, so an
+    // absent parameter cannot mean "off" — and a shared link has to resolve to
+    // the route the sender saw.
+    paramParts.push(`paved_only=${routeState.avoidUnpavedRoads ? 1 : 0}`);
+    if (routeState.avoidTraversedEdges) {
+      paramParts.push('avoid_traversed=1');
+      paramParts.push(`traversed_strength=${routeState.traversedEdgeStrength ?? 50}`);
     }
+    if (routeState.avoidToll) paramParts.push('avoid_toll=1');
 
     // Basemap / view / overlay settings (only non-defaults, to keep the URL short)
     const display = this.getDisplaySettings();
@@ -539,14 +548,6 @@ export class Permalink {
     if (dateMinParam) routeState.photoDateMin = dateMinParam;
     if (dateMaxParam) routeState.photoDateMax = dateMaxParam;
 
-    // Avoid repeated roads settings
-    routeState.avoidRepeatedRoads = params.get('no_repeat') === '1';
-    const noRepeatStrengthParam = params.get('no_repeat_strength');
-    if (noRepeatStrengthParam !== null) {
-      routeState.repeatedRoadsStrength = parseFloat(noRepeatStrengthParam);
-    }
-    updateNoRepeatUI();
-
     const coverageSwitch  = document.getElementById('avoid-photo-coverage');
     if (coverageSwitch)  coverageSwitch.checked = avoidCoverage;
     const coverage360Switch = document.getElementById('avoid-photo-coverage-360');
@@ -562,6 +563,26 @@ export class Permalink {
       applyPhotoCoverageSettings();
       updateStrengthRowVisibility();
     }
+
+    // Trajectory options. Must run after selectedProfile is set above, because
+    // avoidUnpavedRoads writes to the entry of the profile in play. An absent
+    // paved_only keeps the profile default, so older links are left untouched.
+    const pavedOnlyParam = params.get('paved_only');
+    if (pavedOnlyParam !== null) {
+      routeState.avoidUnpavedRoads = pavedOnlyParam === '1';
+    }
+    routeState.avoidTraversedEdges = params.get('avoid_traversed') === '1';
+    // Kept even if tollSupported is still unknown here: /info resolves later and
+    // updateTrajectoryOptionsUI then reveals the pill already switched on.
+    routeState.avoidToll = params.get('avoid_toll') === '1';
+    const traversedStrengthParam = params.get('traversed_strength');
+    if (traversedStrengthParam !== null) {
+      const parsed = parseFloat(traversedStrengthParam);
+      if (!isNaN(parsed)) routeState.traversedEdgeStrength = parsed;
+    }
+    const traversedSlider = document.getElementById('traversed-strength');
+    if (traversedSlider) traversedSlider.value = routeState.traversedEdgeStrength ?? 50;
+    updateTrajectoryOptionsUI();
 
     // Route calculation flag (map layers sync happens in the 'load' handler)
     if (routeState.startPoint && routeState.endPoint) {

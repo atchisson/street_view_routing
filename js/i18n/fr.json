@@ -22,6 +22,14 @@
     "unpavedRoads": "Éviter les routes non revêtues",
     "pavedOnly": "Revêtu uniquement",
     "pavedOnlySub": "Éviter pistes et chemins",
+    "trajectoryOptions": "Options de trajet",
+    "dedupe": "Déduplication",
+    "dedupeSub": "Éviter de repasser 2x au même endroit",
+    "noToll": "Sans péage",
+    "noTollSub": "Éviter les routes à péage",
+    "avoidStrength": "Force de l'évitement",
+    "weak": "Faible",
+    "strong": "Fort",
     "avoidPushing": "Éviter de pousser le vélo",
     "collapsePanel": "Réduire",
     "expandPanel": "Développer",
@@ -31,10 +39,7 @@
       "start": "Point de départ",
       "end": "Point d'arrivée",
       "waypoint": "Point de passage"
-    },
-    "noRepeat": "Ne pas repasser deux fois",
-    "noRepeatSub": "Boucle plutôt que demi-tour",
-    "noRepeatStrength": "Intensité"
+    }
   },
   "heightgraph": {
     "title": "Profil altimétrique",

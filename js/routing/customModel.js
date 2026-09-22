@@ -211,10 +211,30 @@ export function isDefaultCustomModel(customModel, profile = 'car_customizable') 
 }
 
 /**
+ * Convert the avoidance strength slider (0-100) into a traversed_edge_factor.
+ *
+ * Logarithmic, so the middle of the slider lands on the router's own default:
+ * 0 -> 1.0 (no penalty at all), 50 -> 0.1, 100 -> 0.01. The router multiplies
+ * the edge weight by 1/factor and rejects anything outside (0, 1], so the
+ * input is clamped before conversion.
+ *
+ * @param {number} strength - 0 (weak) to 100 (strong)
+ * @returns {number} Factor in (0, 1]
+ */
+export function traversedStrengthToFactor(strength) {
+  const s = Math.min(100, Math.max(0, Number(strength) || 0));
+  const factor = Math.pow(10, -2 * s / 100);
+  return Math.round(factor * 10000) / 10000;
+}
+
+/**
  * Build POST request body with custom model
  * @param {Array<Array<number>>} points - Array of [lng, lat] coordinates
  * @param {string} profile - Profile name
  * @param {Object} customModel - Custom model configuration
+ * @param {Object} [options] - Extra routing options
+ * @param {boolean} [options.avoidTraversedEdges] - Avoid roads used by earlier legs
+ * @param {number} [options.traversedEdgeStrength] - Avoidance strength, 0 to 100
  * @returns {Object} Request body for GraphHopper API
  */
 export function buildPostRequestBodyWithCustomModel(points, profile, customModel, options = {}) {
@@ -227,26 +247,18 @@ export function buildPostRequestBodyWithCustomModel(points, profile, customModel
     details: ['photo_coverage', 'photo_coverage_only360', 'road_class'],
     custom_model: customModel
   };
-
+  
   // ch.disable is required for custom model routing on all profiles
   requestBody['ch.disable'] = true;
 
-  // Avoid repeated roads (custom fork): penalize edges already traversed by previous legs
+  // Avoid roads already used by earlier legs (custom fork). Only sent when the
+  // option is on, so untouched requests keep exactly the shape they had before.
   if (options.avoidTraversedEdges) {
     requestBody['avoid_traversed_edges'] = true;
-    requestBody['traversed_edge_factor'] = options.traversedEdgeFactor ?? 0.1;
+    requestBody['traversed_edge_factor'] = traversedStrengthToFactor(options.traversedEdgeStrength ?? 50);
   }
 
   return requestBody;
-}
-
-/**
- * Map the 0-100 repeated-roads strength slider to a traversed_edge_factor in (0, 1].
- * 0.5 at s=0, ~0.07 at s=50, 0.01 at s=100 (same exponential scale as photo coverage).
- */
-export function traversedStrengthToFactor(strength) {
-  const t = Math.max(0, Math.min(100, strength ?? 50)) / 100;
-  return 0.5 * Math.pow(0.02, t);
 }
 
 // ============================================================================
@@ -396,14 +408,19 @@ export function getPhotoCoverageOnly360Multiplier(customModel) {
 }
 
 // ============================================================================
-// UNPAVED ROADS RULE FUNCTIONS (for car_customizable profile)
+// UNPAVED ROADS RULE FUNCTIONS (all profiles)
 // ============================================================================
 
 /**
  * Update unpaved roads rule in custom model
- * Controls how strongly unpaved roads are avoided
+ *
+ * When on, tracks, paths and bridleways are barred outright (multiply_by 0) —
+ * not merely penalised. Applies to every profile; the spaced `road_class == X`
+ * spelling is what distinguishes this rule from the models' own unspaced
+ * `road_class==X` rules, so the lookup below only ever removes its own.
+ *
  * @param {Object} customModel - Custom model to update
- * @param {boolean} avoidUnpavedRoads - True = strongly avoid (0.2-0.3), false = slightly reduce (0.7-0.8, default)
+ * @param {boolean} avoidUnpavedRoads - True = bar tracks, paths and bridleways
  * @returns {Object} Updated custom model
  */
 export function updateUnpavedRoadsRule(customModel, avoidUnpavedRoads) {
@@ -417,6 +434,39 @@ export function updateUnpavedRoadsRule(customModel, avoidUnpavedRoads) {
   if (avoidUnpavedRoads) {
     customModel.priority.push({
       "if": "road_class == TRACK || road_class == PATH || road_class == BRIDLEWAY",
+      "multiply_by": 0
+    });
+  }
+
+  return customModel;
+}
+
+// ============================================================================
+// TOLL RULE FUNCTIONS (all profiles)
+// ============================================================================
+
+/**
+ * Update the toll rule in custom model
+ *
+ * Bars toll roads outright, like the unpaved rule. Only Toll.ALL is matched:
+ * toll=HGV means only heavy goods vehicles pay, which none of our profiles is.
+ *
+ * The 'toll' encoded value has to be in the router graph or the whole custom
+ * model is rejected, so only call this when routeState.tollSupported is true.
+ *
+ * @param {Object} customModel - Custom model to update
+ * @param {boolean} avoidToll - True = bar toll roads
+ * @returns {Object} Updated custom model
+ */
+export function updateTollRule(customModel, avoidToll) {
+  if (!customModel || !customModel.priority) return customModel;
+
+  const idx = customModel.priority.findIndex(r => r.if && r.if.includes('toll == ALL'));
+  if (idx !== -1) customModel.priority.splice(idx, 1);
+
+  if (avoidToll) {
+    customModel.priority.push({
+      "if": "toll == ALL",
       "multiply_by": 0
     });
   }
