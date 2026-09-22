@@ -1,5 +1,5 @@
 {
-  "enabled": false,
-  "message": "Le serveur de routage est temporairement indisponible. Le calcul d'itinéraire est suspendu, mais la carte et la couverture photo restent consultables. Merci de votre patience.",
+  "enabled": true,
+  "message": "Déménagement en cours : le service pourra être coupé momentanément au cours des prochaines semaines. Merci de votre compréhension.",
   "until": ""
 }
